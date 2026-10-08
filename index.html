@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ranges Préflop Cash Game</title>
-<meta name="description" content="Ranges préflop pour le cash game en no-limit hold'em : choisis la table, ta place et l'action, tape ta main et vois s'il faut relancer, suivre ou se coucher.">
+<meta name="description" content="Ranges préflop pour le cash game en no-limit hold'em / Preflop charts for no-limit hold'em cash games.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
@@ -129,49 +129,95 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .notes h2{font-size:18px;color:var(--ink);margin-bottom:4px}
 .notes p{margin:0 0 6px}
 @media (prefers-reduced-motion: no-preference){.cell{transition:transform .12s ease}}
+
+/* barre d'outils : langue + aide */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lang{display:flex;gap:2px;border:1px solid var(--line);border-radius:7px;padding:2px;background:var(--surface-2)}
+.lang button{font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.06em;border:0;background:transparent;color:var(--muted);border-radius:5px;padding:5px 9px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.helpbtn{display:inline-flex;align-items:center;gap:6px}
+.helpbtn .q{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:12px;font-weight:700}
+.topright{display:flex;flex-direction:column;gap:10px;align-items:flex-start;max-width:52ch}
+.linkbtn{font:inherit;font-weight:600;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* fenêtre d'aide */
+dialog.help{width:min(760px,calc(100vw - 32px));max-height:min(88vh,1000px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+dialog.help::backdrop{background:rgba(8,14,11,.6)}
+.helphead{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--line)}
+.helphead h2{font-size:28px}
+.helpnav{display:flex;flex-wrap:wrap;gap:4px 12px;padding:10px 20px;border-bottom:1px solid var(--line);font-size:14px}
+.helpnav a{color:var(--accent);font-weight:600;text-decoration:none}
+.helpnav a:hover{text-decoration:underline}
+.helpbody{padding:4px 20px 24px}
+.helpbody section{padding-top:14px}
+.helpbody h3{font-family:var(--f-display);font-size:21px;margin:0 0 6px;scroll-margin-top:70px}
+.helpbody p,.helpbody li,.helpbody dd{max-width:68ch}
+.helpbody p{margin:0 0 8px}
+.helpbody ul,.helpbody ol{margin:0 0 8px;padding-left:20px}
+.helpbody li{margin-bottom:4px}
+.helpbody dl{margin:0;display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:6px 16px}
+.helpbody dt{font-weight:600}
+.helpbody dd{margin:0;color:var(--muted)}
+@media (max-width:560px){.helpbody dl{grid-template-columns:minmax(0,1fr)}.helpbody dd{margin-bottom:6px}}
+.helpbody code{font-family:var(--f-mono);font-size:.92em;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.tablewrap{overflow-x:auto}
+.helpbody table{border-collapse:collapse;width:100%;font-size:14px;margin:4px 0 10px}
+.helpbody th,.helpbody td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.helpbody th{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.06em;font-size:12px;color:var(--muted)}
+.helpbody td:first-child{font-family:var(--f-display);font-weight:700;font-size:16px;white-space:nowrap}
+.chip{display:inline-block;padding:0 6px;border-radius:4px;font-weight:600}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div>
-      <span class="eyebrow">No-limit hold'em · cash game · 100bb</span>
-      <h1>Ranges Préflop</h1>
+      <span class="eyebrow" data-i18n="eyebrow"></span>
+      <h1 data-i18n="h1"></h1>
     </div>
-    <p class="lede">Choisis le nombre de joueurs, ta place et l'action avant toi, puis tape ta main. La grille montre quoi faire avec chaque main dans ce spot.</p>
+    <div class="topright">
+      <div class="toolbar">
+        <div class="lang" id="lang" role="group" aria-label="Langue / Language">
+          <button type="button" data-lang="fr" lang="fr">FR</button>
+          <button type="button" data-lang="en" lang="en">EN</button>
+        </div>
+        <button class="btn helpbtn" id="helpOpen" type="button"><span class="q" aria-hidden="true">?</span><span data-i18n="help"></span></button>
+      </div>
+      <p class="lede"><span data-i18n="lede"></span> <button class="linkbtn" id="helpOpen2" type="button" data-i18n="beginner"></button></p>
+    </div>
   </header>
 
   <main class="layout">
-    <section class="panel spot" aria-label="Ton spot">
+    <section class="panel spot" data-i18n-aria="spotAria">
       <div>
-        <span class="label" id="playersLbl">Joueurs à la table</span>
+        <span class="label" id="playersLbl" data-i18n="players"></span>
         <div class="seg" id="players" role="group" aria-labelledby="playersLbl"></div>
       </div>
       <div class="table" id="table"></div>
       <div>
-        <span class="label" id="seatsLbl">Ta place</span>
+        <span class="label" id="seatsLbl" data-i18n="seat"></span>
         <div class="seg" id="seats" role="group" aria-labelledby="seatsLbl"></div>
       </div>
       <div>
-        <span class="label" id="sitsLbl">Action avant toi</span>
+        <span class="label" id="sitsLbl" data-i18n="before"></span>
         <div class="seg col" id="sits" role="group" aria-labelledby="sitsLbl"></div>
       </div>
       <div id="vilField">
-        <span class="label" id="vilLbl">Relanceur</span>
+        <span class="label" id="vilLbl"></span>
         <div class="seg" id="vils" role="group" aria-labelledby="vilLbl"></div>
       </div>
       <div id="sbField">
-        <span class="label" id="sbLbl">Stratégie en small blind</span>
+        <span class="label" id="sbLbl" data-i18n="sbPlan"></span>
         <div class="seg" id="sbplan" role="group" aria-labelledby="sbLbl"></div>
       </div>
     </section>
 
     <section class="main">
       <div class="panel">
-        <label for="hand" class="label">Ta main</label>
+        <label for="hand" class="label" data-i18n="hand"></label>
         <div class="handrow">
           <input id="hand" autocomplete="off" spellcheck="false" placeholder="AKs, QJo, 77, Ah Kd">
-          <button class="btn" id="rand" type="button">Main au hasard</button>
+          <button class="btn" id="rand" type="button" data-i18n="random"></button>
         </div>
         <div class="verdict" id="verdict" aria-live="polite"></div>
       </div>
@@ -186,26 +232,35 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
     </section>
   </main>
 
-  <section class="panel" id="drill" aria-label="Entraînement">
+  <section class="panel" id="drill" data-i18n-aria="drillTitle">
     <div class="drillhead">
-      <div><span class="eyebrow">Entraînement</span><h2>Quiz de spots</h2></div>
+      <div><span class="eyebrow" data-i18n="drillEyebrow"></span><h2 data-i18n="drillTitle"></h2></div>
       <div class="score" id="score"></div>
     </div>
     <div class="dspot" id="dDesc"></div>
     <div class="drow"><div class="cards" id="dCards"></div><div class="seg" id="dBtns"></div></div>
     <div class="feed" id="dFeed" aria-live="polite"></div>
     <div class="dfoot">
-      <button class="btn primary" id="dNext" type="button">Spot suivant</button>
-      <button class="btn" id="dOpen" type="button">Voir ce spot dans la grille</button>
+      <button class="btn primary" id="dNext" type="button" data-i18n="next"></button>
+      <button class="btn" id="dOpen" type="button" data-i18n="openSpot"></button>
     </div>
   </section>
 
   <footer class="notes">
-    <h2>Hypothèses de ces ranges</h2>
-    <p>Tapis effectifs de 100bb, rake standard type online, open à 2,5bb (3bb depuis la small blind). Les ranges sont simplifiées à partir de solutions de solveur, avec une seule action par main : quand un solveur mélange plusieurs actions, la main reçoit l'action la plus fréquente.</p>
-    <p>Adapte-toi aux joueurs : contre une table large et passive, relance plus de mains pour la value et bluffe moins ; contre des joueurs serrés et agressifs, couche davantage le bas de chaque range de call. En live, où les opens font 3bb ou plus, défends un peu plus serré. S'il y a déjà un joueur qui a payé l'open (spot de squeeze), garde seulement le haut de ta range de 3-bet et paye moins.</p>
+    <h2 data-i18n="notesTitle"></h2>
+    <p data-i18n="notes1"></p>
+    <p data-i18n="notes2"></p>
   </footer>
 </div>
+
+<dialog class="help" id="help" aria-labelledby="helpTitle">
+  <div class="helphead">
+    <h2 id="helpTitle" data-i18n="helpTitle"></h2>
+    <button class="btn" id="helpClose" type="button" data-i18n="close"></button>
+  </div>
+  <nav class="helpnav" id="helpNav"></nav>
+  <div class="helpbody" id="helpBody"></div>
+</dialog>
 
 <script>
 const RANKS = "AKQJT98765432";
@@ -318,15 +373,464 @@ function cellCode(i, j) {
   return i < j ? RANKS[i] + RANKS[j] + "s" : RANKS[j] + RANKS[i] + "o";
 }
 
+
+/* ---------- textes (français / anglais) ---------- */
+const STR = {
+  fr: {
+    pageTitle: "Ranges Préflop Cash Game",
+    eyebrow: "No-limit hold'em · cash game · 100bb",
+    h1: "Ranges Préflop",
+    lede: "Choisis le nombre de joueurs, ta place et l'action avant toi, puis tape ta main. La grille montre quoi faire avec chaque main dans ce spot.",
+    beginner: "Débutant ? Lis l'aide.",
+    help: "Aide",
+    helpTitle: "Aide et lexique",
+    close: "Fermer",
+    spotAria: "Ton spot",
+    players: "Joueurs à la table",
+    seat: "Ta place",
+    before: "Action avant toi",
+    sbPlan: "Stratégie en small blind",
+    sbMix: "Relance ou limp",
+    sbRaise: "Relance ou couche",
+    hand: "Ta main",
+    random: "Main au hasard",
+    drillEyebrow: "Entraînement",
+    drillTitle: "Quiz de spots",
+    next: "Spot suivant",
+    openSpot: "Voir ce spot dans la grille",
+    notesTitle: "Hypothèses de ces ranges",
+    notes1: "Tapis effectifs de 100bb, rake standard type online, open à 2,5bb (3bb depuis la small blind). Les ranges sont simplifiées à partir de solutions de solveur, avec une seule action par main : quand un solveur mélange plusieurs actions, la main reçoit l'action la plus fréquente.",
+    notes2: "Adapte-toi aux joueurs : contre une table large et passive, relance plus de mains pour la value et bluffe moins ; contre des joueurs serrés et agressifs, couche davantage le bas de chaque range de call. En live, où les opens font 3bb ou plus, défends un peu plus serré. S'il y a déjà un joueur qui a payé l'open (spot de squeeze), garde seulement le haut de ta range de 3-bet et paye moins.",
+    playersAria: n => `${n} joueurs`,
+    sitAria: p => `S'asseoir en ${p}`,
+    sits: {
+      rfi: ["Tout le monde s'est couché", "premier à parler"],
+      limp: ["Quelqu'un a limpé", "a payé 1bb"],
+      raise: ["Quelqu'un a relancé", "open"],
+      "3bet": ["Tu as relancé, on te 3-bet", "sur-relance"],
+      "4bet": ["Tu as 3-bet, on te 4-bet", "re-sur-relance"],
+    },
+    vil: { limp: "Premier à limper", raise: "Qui a relancé", "3bet": "Qui t'a 3-bet", "4bet": "Qui a ouvert puis 4-bet" },
+    pos: {
+      "UTG": "Under the gun : premier à parler",
+      "UTG+1": "Under the gun +1",
+      "UTG+2": "Under the gun +2",
+      "LJ": "Lojack : milieu de parole",
+      "HJ": "Hijack : 2 places avant le bouton",
+      "CO": "Cutoff : juste avant le bouton",
+      "BTN": "Bouton (dealer) : parle en dernier après le flop",
+      "BTN/SB": "Bouton et small blind (heads-up)",
+      "SB": "Small blind : met 0,5bb",
+      "BB": "Big blind : met 1bb",
+    },
+    status: { you: "toi", youOpen: "toi · open", you3: "toi · 3-bet", limp: "limp", raise: "relance", "3bet": "3-bet", "4bet": "4-bet", folded: "couché", toAct: "à parler", unknown: "?" },
+    pot: { rfi: "Blinds 0,5 / 1", limp: "Pot 2,5bb +", raise: "Pot 4bb", "3bet": "Pot ≈ 11bb", "4bet": "Pot ≈ 33bb" },
+    a: { raise: "Relancer", limp: "Limper", fold: "Se coucher", check: "Checker", complete: "Compléter", iso: "Iso-relancer", overlimp: "Sur-limper", threebet: "3-bet", call: "Suivre", fourbet: "4-bet", allin: "Tapis" },
+    s: {
+      fold: "Jette ta main.",
+      huRaise: "Relance à <b>2–2,5bb</b>.",
+      sbRaise: "Relance à <b>3bb</b>.",
+      sbLimp: "Complète pour <b>0,5bb</b> de plus.",
+      open: "Ouvre à <b>2,5bb</b> (3bb en live). Ajoute 1bb par limper.",
+      bbVsSb: "Relance à <b>3,5–4bb</b>.",
+      isoRaise: "Relance à <b>4bb + 1bb par limper</b>.",
+      check: "Checke et vois le flop gratuitement.",
+      sbIso: "Relance à <b>5bb + 1bb par limper en plus</b>.",
+      complete: "Complète pour <b>0,5bb</b>.",
+      overlimp: "Paye <b>1bb</b> derrière.",
+      threeOop: "3-bet à <b>environ 4x</b> l'open (10–12bb) hors de position.",
+      threeIp: "3-bet à <b>3x</b> l'open (environ 7,5bb) en position.",
+      callBB: "Paye. Tu fermes l'action à prix réduit.",
+      call: "Paye l'open.",
+      fourbet: "4-bet à <b>environ 2,3x</b> le 3-bet (22–25bb).",
+      call3: "Paye le 3-bet.",
+      allin: "Envoie <b>100bb</b>.",
+      call4: "Paye et joue le flop avec environ 50bb derrière.",
+    },
+    table: n => n === 2 ? "Heads-up" : `${n} joueurs`,
+    sub: {
+      rfi: t => `${t} · tout le monde s'est couché`,
+      limp: (t, v) => `${t} · ${v} a limpé`,
+      raise: (t, v) => `${t} · ${v} a ouvert à 2,5bb`,
+      threebet: (t, v, ip) => `${t} · tu as ouvert, ${v} a 3-bet · tu es ${ip ? "en position" : "hors de position"}`,
+      fourbet: (t, v) => `${t} · ${v} a ouvert, tu as 3-bet, ${v} a 4-bet`,
+    },
+    ti: {
+      hu: "Open au bouton (heads-up)",
+      sbMix: "Small blind : relance ou limp",
+      sbRaise: "Small blind : relance ou couche",
+      open: h => `Open depuis ${h}`,
+      bbVsSb: "Big blind contre limp de la small blind",
+      bbVsLimp: "Big blind contre limpers",
+      sbVsLimp: "Small blind contre limpers",
+      vsLimp: h => `${h} contre limpers`,
+      vsOpen: (h, v) => `${h} contre open ${v}`,
+      vs3bet: (h, v) => `Open ${h} contre 3-bet ${v}`,
+      vs4bet: (h, v) => `3-bet ${h} contre 4-bet ${v}`,
+    },
+    tip: {
+      hu: "En heads-up, le bouton a la position pendant tout le coup : ouvre très large. Couche seulement les pires mains dépareillées.",
+      sbMix: "Tout le monde s'est couché jusqu'à toi en small blind. Relance tes mains fortes ; limpe les mains jouables qui ne veulent pas un gros pot hors de position.",
+      sbRaise: "Plan simple en small blind : jamais de limp. Relance à 3bb ou couche-toi, c'est plus facile à jouer et efficace contre des big blinds agressives.",
+      open: "Premier à entrer dans le coup : relance ou couche-toi. Ne limpe jamais depuis ces places. Moins il reste de joueurs derrière toi, plus tu ouvres large.",
+      bbVsSb: "Tu as la position contre la small blind. Relance tes mains fortes pour la value et checke le reste : tu ne te couches jamais ici.",
+      bbMulti: "Tu as déjà 1bb dans le pot et le flop est gratuit. Relance seulement les mains fortes, car tu seras hors de position contre plusieurs joueurs.",
+      sbLimp: "Compléter coûte peu avec un pot qui grossit déjà. Relance seulement les mains qui jouent bien en tête-à-tête hors de position.",
+      vsLimp: "Les limpers ont souvent des mains faibles. Iso-relance pour les jouer en tête-à-tête ; sur-limpe les petites paires et les mains assorties qui gagnent de gros pots à plusieurs.",
+      bbDef: "En big blind tu as déjà 1bb dans le pot et tu fermes l'action, donc tu défends large. Contre des opens de début de parole, défends plus serré.",
+      sbDef: "Depuis la small blind, privilégie 3-bet ou couche. Payer invite la big blind à squeezer et te laisse hors de position.",
+      ipDef: "En position tu peux payer plus de mains. 3-bet le haut de ta range plus quelques As assortis en bluff.",
+      vs3bet: ip => "Contre un 3-bet, continue avec environ 40 à 50 % de ta range d'open. " + (ip ? "En position, tu peux payer un peu plus large que cette grille." : "Hors de position, retire d'abord les calls les plus faibles."),
+      vs4early: "Un 4-bet depuis une place de début de parole est très fort. Seules les meilleures mains continuent.",
+      vs4late: "Les joueurs en fin de parole 4-bet plus léger, tu peux donc continuer avec plus de mains.",
+    },
+    handName: (code, r) => code.length === 2 ? `Paire de ${r(code[0])}` : `${r(code[0])}${r(code[1])} ${code[2] === "s" ? "assortis" : "dépareillés"}`,
+    errSame: "C'est deux fois la même carte.",
+    errPair: "Une paire ne peut pas être assortie.",
+    errRead: raw => `Impossible de lire « ${raw} ». Essaie AKs, QJo, 77 ou Ah Kd.`,
+    handHint: "Tape une main comme AKs, T9s, 77 ou Ah Kd, ou touche une case de la grille.",
+    describe: {
+      lead: (t, h) => `${t} · tu es ${h} · `,
+      rfi: () => "tout le monde se couche jusqu'à toi",
+      limp: v => `${v} limpe`,
+      raise: v => `${v} ouvre à 2,5bb`,
+      "3bet": v => `tu ouvres, ${v} te 3-bet`,
+      "4bet": v => `${v} ouvre, tu 3-bet, ${v} te 4-bet`,
+    },
+    ok: "Bonne réponse.",
+    no: "Raté.",
+    okLine: (code, a) => `${code} : ${a}.`,
+    noLine: (code, a, p) => `Ici, ${code} c'est <b>${a}</b>, pas ${p}.`,
+    score: (ok, n, s) => `<b>${ok}/${n}</b> justes · série de ${s}`,
+    scoreEmpty: "Choisis une action pour chaque spot",
+    pct: x => x.toFixed(1).replace(".", ",") + " %",
+    helpSections: [
+      ["bases", "Le poker en 30 secondes", `
+<p>Au <b>Texas hold'em</b>, chaque joueur reçoit 2 cartes cachées, sa « main ». Ensuite 5 cartes communes, visibles par tous, arrivent en trois fois : le <b>flop</b> (3 cartes), le <b>turn</b> (1 carte) et la <b>river</b> (1 carte). Il y a un tour d'enchères avant le flop et après chacune de ces étapes.</p>
+<p>Tu gagnes le pot de deux façons : avoir la meilleure combinaison de 5 cartes à la fin, ou faire coucher tous les autres joueurs avant.</p>
+<p>Le <b>préflop</b> est le premier tour d'enchères, quand tu n'as que tes 2 cartes. C'est la décision que tu prends à chaque main, et c'est celle que ce site t'aide à prendre. Bien jouer le préflop, c'est surtout savoir quelles mains jeter.</p>
+<p>En <b>cash game</b>, les jetons valent de l'argent réel, les blinds ne montent pas et tu peux quitter la table quand tu veux. C'est différent du tournoi.</p>`],
+      ["usage", "Utiliser le site en 4 étapes", `
+<ol>
+<li><b>Joueurs à la table</b> : combien de joueurs ont des cartes. « HU » veut dire heads-up, 2 joueurs.</li>
+<li><b>Ta place</b> : clique sur un bouton ou directement sur la table. Ta place est en noir sur la table.</li>
+<li><b>Action avant toi</b> : ce qui s'est passé avant que ce soit à toi. Si quelqu'un a misé, choisis aussi quel joueur (il apparaît en rouge sur la table).</li>
+<li><b>Ta main</b> : tape-la (par exemple <code>AKs</code> ou <code>Ah Kd</code>) ou clique sur une case de la grille. Le grand bouton coloré te dit quoi faire, et la ligne en dessous combien miser.</li>
+</ol>
+<p>Le <b>quiz</b> en bas de page te pose des situations au hasard pour t'entraîner.</p>`],
+      ["actions", "Les actions", `
+<dl>
+<dt>Se coucher (fold)</dt><dd>Abandonner ta main. Tu ne perds que ce que tu as déjà mis dans le pot.</dd>
+<dt>Checker (check)</dt><dd>Passer sans miser. Possible seulement si personne n'a misé plus que toi, par exemple en big blind quand les autres ont seulement payé.</dd>
+<dt>Suivre / payer (call)</dt><dd>Mettre autant que la dernière mise pour rester dans le coup.</dd>
+<dt>Relancer (raise)</dt><dd>Miser plus que la mise actuelle. Les autres doivent payer, relancer ou se coucher.</dd>
+<dt>Open</dt><dd>La première relance du coup.</dd>
+<dt>Limper (limp)</dt><dd>Entrer dans le coup en payant juste la big blind au lieu de relancer. C'est souvent le signe d'un joueur faible.</dd>
+<dt>Compléter</dt><dd>En small blind, ajouter 0,5bb pour égaler la big blind.</dd>
+<dt>Iso-relancer</dt><dd>Relancer après un limper pour l'« isoler » et jouer contre lui seul.</dd>
+<dt>Sur-limper</dt><dd>Limper toi aussi après un autre limper.</dd>
+<dt>3-bet</dt><dd>Relancer une relance. La big blind compte comme la 1re mise, l'open comme la 2e, la sur-relance est donc la 3e.</dd>
+<dt>4-bet</dt><dd>Relancer un 3-bet.</dd>
+<dt>Tapis (all-in)</dt><dd>Miser tous tes jetons.</dd>
+<dt>Squeeze</dt><dd>Faire un 3-bet quand il y a déjà eu un open et au moins un joueur qui a payé.</dd>
+</dl>`],
+      ["positions", "Les places (positions)", `
+<p>Le <b>bouton</b> (le jeton « D » sur la table) avance d'une place à chaque main. Les deux joueurs à sa gauche posent les <b>blinds</b>, des mises obligatoires qui lancent le pot. Au préflop, le premier à parler est le joueur à gauche de la big blind.</p>
+<p>Après le flop, le bouton parle toujours en dernier. Parler en dernier est un gros avantage : tu vois ce que font les autres avant de décider. C'est pour ça que la grille joue beaucoup plus de mains au bouton qu'en UTG.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Abrév.</th><th>Nom</th><th>À retenir</th></tr></thead>
+<tbody>
+<tr><td>UTG</td><td>Under the gun (« sous le pistolet »)</td><td>Premier à parler au préflop, avec tout le monde derrière. Joue serré.</td></tr>
+<tr><td>UTG+1, UTG+2</td><td>Under the gun +1 / +2</td><td>Juste après UTG, à 8 ou 9 joueurs. Encore en début de parole.</td></tr>
+<tr><td>LJ</td><td>Lojack</td><td>3 places avant le bouton. Milieu de parole.</td></tr>
+<tr><td>HJ</td><td>Hijack</td><td>2 places avant le bouton.</td></tr>
+<tr><td>CO</td><td>Cutoff</td><td>Juste avant le bouton. Bonne place pour ouvrir large.</td></tr>
+<tr><td>BTN</td><td>Bouton (dealer)</td><td>Parle en dernier après le flop. Meilleure place de la table.</td></tr>
+<tr><td>SB</td><td>Small blind (petite blinde)</td><td>Met 0,5bb d'office. Parle en premier après le flop : place difficile.</td></tr>
+<tr><td>BB</td><td>Big blind (grosse blinde)</td><td>Met 1bb d'office. Parle en dernier au préflop, donc défend beaucoup de mains.</td></tr>
+</tbody></table></div>
+<p>Groupes de places : <b>EP</b> (early position, début de parole : UTG à UTG+2), <b>MP</b> (middle position : LJ, HJ), <b>LP</b> (late position : CO, BTN).</p>
+<p><b>IP</b> (in position) : tu parles après ton adversaire après le flop. <b>OOP</b> (out of position) : tu parles avant lui.</p>
+<p>Avec moins de joueurs, on enlève des places en partant du début : à 6 joueurs il reste UTG, HJ, CO, BTN, SB, BB. En heads-up, le bouton est aussi la small blind.</p>`],
+      ["mains", "Écrire une main", `
+<ul>
+<li>Valeurs, de la plus forte à la plus faible : <b>A</b> (as), <b>K</b> (roi, king), <b>Q</b> (dame, queen), <b>J</b> (valet, jack), <b>T</b> (10, ten), puis 9 à 2.</li>
+<li><code>s</code> après deux valeurs = <b>assorties</b> (suited) : même couleur. A♠ K♠ s'écrit <code>AKs</code>.</li>
+<li><code>o</code> = <b>dépareillées</b> (offsuit) : couleurs différentes. A♠ K♦ s'écrit <code>AKo</code>.</li>
+<li>Deux fois la même valeur = une <b>paire</b> : <code>77</code>, <code>QQ</code>. On dit aussi « pocket pair ».</li>
+<li>Pour une main exacte, mets la valeur puis la couleur en anglais : <code>s</code> ♠ pique (spades), <code>h</code> ♥ cœur (hearts), <code>d</code> ♦ carreau (diamonds), <code>c</code> ♣ trèfle (clubs). Exemple : <code>Ah Kd</code> = A♥ K♦.</li>
+<li>Sans s ni o (<code>AK</code>), le site montre les deux versions.</li>
+</ul>
+<p>Pourquoi assorties ou non ? Deux cartes de la même couleur peuvent faire une <b>couleur</b> (5 cartes de la même couleur). Ça rend la main un peu meilleure, donc les mains assorties sont jouées plus souvent.</p>`],
+      ["grille", "Lire la grille", `
+<p>La grille montre les 169 mains de départ différentes.</p>
+<ul>
+<li><b>La diagonale</b> contient les paires, de AA en haut à gauche à 22 en bas à droite.</li>
+<li><b>Au-dessus</b> de la diagonale (en haut à droite) : les mains assorties (s).</li>
+<li><b>En dessous</b> (en bas à gauche) : les mains dépareillées (o).</li>
+<li>Plus une case est proche du coin en haut à gauche, plus la main est forte.</li>
+</ul>
+<p>Couleurs : <span class="chip act-raise">rouge</span> relancer, 3-bet ou 4-bet · <span class="chip act-call">vert</span> suivre · <span class="chip act-limp">jaune</span> limper, checker ou compléter · <span class="chip act-allin">violet</span> tapis · <span class="chip act-fold">gris</span> se coucher.</p>
+<p>Les pourcentages sous la grille comptent les <b>combinaisons</b> (combos). Il y a 1 326 façons de recevoir 2 cartes : une paire existe en 6 combos, une main assortie en 4, une main dépareillée en 12. AKo arrive donc 3 fois plus souvent que AKs.</p>`],
+      ["lexique", "Lexique", `
+<dl>
+<dt>bb</dt><dd>Big blind, utilisée comme unité de mesure. « Ouvre à 2,5bb » veut dire miser 2,5 fois la big blind. À une table 1 € / 2 €, 2,5bb = 5 €.</dd>
+<dt>Tapis effectif</dt><dd>Le plus petit tapis entre toi et ton adversaire, car on ne peut pas gagner plus que ça. Les ranges du site supposent 100bb, le standard en cash game.</dd>
+<dt>Pot</dt><dd>Les jetons au milieu de la table, que gagne le vainqueur du coup.</dd>
+<dt>Range</dt><dd>L'ensemble des mains qu'on joue d'une certaine façon dans une situation. « Ma range d'open au CO » = toutes les mains que j'ouvre depuis le cutoff.</dd>
+<dt>Spot</dt><dd>Une situation précise : ta place, le nombre de joueurs et ce qui s'est passé avant toi.</dd>
+<dt>Heads-up (HU)</dt><dd>Jouer à 2 joueurs.</dd>
+<dt>Value</dt><dd>Miser avec une main forte pour être payé par une main moins bonne.</dd>
+<dt>Bluff</dt><dd>Miser avec une main faible pour faire coucher une main meilleure. Les As assortis bas (A5s, A4s) servent souvent de bluff au 3-bet.</dd>
+<dt>Serré / large</dt><dd>Jouer serré (tight) = peu de mains. Jouer large (loose) = beaucoup de mains.</dd>
+<dt>Passif / agressif</dt><dd>Un joueur passif paye souvent et relance rarement. Un joueur agressif mise et relance souvent.</dd>
+<dt>Rake</dt><dd>La commission prise par la salle ou le site sur chaque pot.</dd>
+<dt>Solveur / GTO</dt><dd>Un logiciel qui calcule une stratégie impossible à exploiter (GTO = game theory optimal). Les ranges ici sont des versions simplifiées de ces calculs.</dd>
+</dl>`],
+      ["conseils", "Conseils pour débuter", `
+<ul>
+<li>Suis la grille à la lettre pendant plusieurs sessions, même quand une main « a l'air jolie » (comme K7o ou J5s en début de parole).</li>
+<li>Joue plus de mains en fin de parole (CO, BTN) et moins en début (UTG).</li>
+<li>Ne limpe pas : quand tu es le premier à entrer dans le coup, relance ou couche-toi.</li>
+<li>En big blind, tu as déjà payé 1bb : tu peux défendre plus de mains, mais pas toutes.</li>
+<li>Commence par apprendre les deux spots les plus fréquents : « Tout le monde s'est couché » et « Quelqu'un a relancé ». Le quiz est fait pour ça.</li>
+</ul>`],
+    ],
+  },
+
+  en: {
+    pageTitle: "Cash Game Preflop Charts",
+    eyebrow: "No-limit hold'em · cash game · 100bb",
+    h1: "Preflop Charts",
+    lede: "Set the table size, pick your seat and the action in front of you, then type your hand. The chart shows what to do with every hand from that spot.",
+    beginner: "New to poker? Read the help.",
+    help: "Help",
+    helpTitle: "Help and glossary",
+    close: "Close",
+    spotAria: "Your spot",
+    players: "Players at the table",
+    seat: "Your seat",
+    before: "Action before you",
+    sbPlan: "Small blind plan",
+    sbMix: "Raise or limp",
+    sbRaise: "Raise or fold",
+    hand: "Your hand",
+    random: "Deal random hand",
+    drillEyebrow: "Practice",
+    drillTitle: "Spot drill",
+    next: "Next spot",
+    openSpot: "Open this spot in the chart",
+    notesTitle: "What these charts assume",
+    notes1: "100bb effective stacks, standard online-style rake, opens to 2.5bb (3bb from the small blind). Ranges are simplified from solver solutions into one action per hand: where a solver mixes, the hand gets its most common action.",
+    notes2: "Adjust to the players: against loose, passive tables widen your value raises and cut bluffs; against tight, aggressive players fold more of the bottom of each calling range. In live games where opens are 3bb or bigger, defend a little tighter. With a caller already in the pot (a squeeze spot), keep only the top of the 3-bet range and call less.",
+    playersAria: n => `${n} players`,
+    sitAria: p => `Sit in ${p}`,
+    sits: {
+      rfi: ["Folded to you", "first in"],
+      limp: ["Someone limped", "called 1bb"],
+      raise: ["Someone raised", "open raise"],
+      "3bet": ["You raised, got 3-bet", "re-raise"],
+      "4bet": ["You 3-bet, got 4-bet", "re-re-raise"],
+    },
+    vil: { limp: "Who limped first", raise: "Who raised", "3bet": "Who 3-bet you", "4bet": "Who opened and 4-bet" },
+    pos: {
+      "UTG": "Under the gun: first to act",
+      "UTG+1": "Under the gun +1",
+      "UTG+2": "Under the gun +2",
+      "LJ": "Lojack: middle position",
+      "HJ": "Hijack: two seats before the button",
+      "CO": "Cutoff: right before the button",
+      "BTN": "Button (dealer): acts last after the flop",
+      "BTN/SB": "Button and small blind (heads-up)",
+      "SB": "Small blind: posts 0.5bb",
+      "BB": "Big blind: posts 1bb",
+    },
+    status: { you: "you", youOpen: "you · raised", you3: "you · 3-bet", limp: "limped", raise: "raised", "3bet": "3-bet", "4bet": "4-bet", folded: "folded", toAct: "to act", unknown: "?" },
+    pot: { rfi: "Blinds 0.5 / 1", limp: "Pot 2.5bb +", raise: "Pot 4bb", "3bet": "Pot ≈ 11bb", "4bet": "Pot ≈ 33bb" },
+    a: { raise: "Raise", limp: "Limp", fold: "Fold", check: "Check", complete: "Complete", iso: "Iso-raise", overlimp: "Over-limp", threebet: "3-bet", call: "Call", fourbet: "4-bet", allin: "All-in" },
+    s: {
+      fold: "Throw it away.",
+      huRaise: "Raise to <b>2–2.5bb</b>.",
+      sbRaise: "Raise to <b>3bb</b>.",
+      sbLimp: "Complete for <b>0.5bb</b> more.",
+      open: "Open to <b>2.5bb</b> (3bb live). Add 1bb per limper.",
+      bbVsSb: "Raise to <b>3.5–4bb</b>.",
+      isoRaise: "Raise to <b>4bb + 1bb per limper</b>.",
+      check: "Check and see a free flop.",
+      sbIso: "Raise to <b>5bb + 1bb per extra limper</b>.",
+      complete: "Complete for <b>0.5bb</b>.",
+      overlimp: "Call <b>1bb</b> behind.",
+      threeOop: "3-bet to <b>about 4x</b> the open (10–12bb) out of position.",
+      threeIp: "3-bet to <b>3x</b> the open (about 7.5bb) in position.",
+      callBB: "Call. You close the action at a discount.",
+      call: "Call the open.",
+      fourbet: "4-bet to <b>about 2.3x</b> the 3-bet (22–25bb).",
+      call3: "Call the 3-bet.",
+      allin: "Shove <b>100bb</b>.",
+      call4: "Call and play the flop with about 50bb behind.",
+    },
+    table: n => n === 2 ? "Heads-up" : `${n}-handed`,
+    sub: {
+      rfi: t => `${t} · folded to you`,
+      limp: (t, v) => `${t} · ${v} limped`,
+      raise: (t, v) => `${t} · ${v} opened to 2.5bb`,
+      threebet: (t, v, ip) => `${t} · you opened, ${v} 3-bet · you are ${ip ? "in position" : "out of position"}`,
+      fourbet: (t, v) => `${t} · ${v} opened, you 3-bet, ${v} 4-bet`,
+    },
+    ti: {
+      hu: "Button open (heads-up)",
+      sbMix: "Small blind: raise or limp",
+      sbRaise: "Small blind: raise or fold",
+      open: h => `${h} open raise`,
+      bbVsSb: "Big blind vs small blind limp",
+      bbVsLimp: "Big blind vs limpers",
+      sbVsLimp: "Small blind vs limpers",
+      vsLimp: h => `${h} vs limpers`,
+      vsOpen: (h, v) => `${h} vs ${v} open`,
+      vs3bet: (h, v) => `${h} open vs ${v} 3-bet`,
+      vs4bet: (h, v) => `${h} 3-bet vs ${v} 4-bet`,
+    },
+    tip: {
+      hu: "Heads-up the button is in position for the whole hand, so open very wide. Fold only the weakest offsuit junk.",
+      sbMix: "Everyone folded to you in the small blind. Raise your strong hands; limp hands that play well but don't want a big pot out of position.",
+      sbRaise: "Simple plan for the small blind: no limps. Raise to 3bb or fold, which is easier to play and fine against aggressive big blinds.",
+      open: "First in, raise or fold. Never open-limp from these seats. The fewer players left behind you, the wider you open.",
+      bbVsSb: "You're in position against the small blind. Raise strong hands for value and check the rest; you never fold here.",
+      bbMulti: "You already have 1bb in and the flop is free. Raise only strong hands since you'll be out of position against several players.",
+      sbLimp: "Completing is cheap with the pot already growing. Raise only hands that do well heads-up out of position.",
+      vsLimp: "Limpers usually hold weak hands. Iso-raise to play them heads-up; over-limp small pairs and suited hands that win big pots multiway.",
+      bbDef: "In the big blind you already have 1bb in and close the action, so you defend wide. Against earlier openers, defend tighter.",
+      sbDef: "From the small blind lean on 3-bet or fold. Flatting invites the big blind to squeeze and leaves you out of position.",
+      ipDef: "In position you can call more hands. 3-bet the top of your range plus a few suited aces as bluffs.",
+      vs3bet: ip => "Against a 3-bet, keep roughly the top 40–50% of your opening range. " + (ip ? "In position you can call a bit wider than this chart." : "Out of position, cut the weakest calls first."),
+      vs4early: "A 4-bet from an early seat is very strong. Only the best hands continue.",
+      vs4late: "Late-position openers 4-bet lighter, so you can continue with more hands.",
+    },
+    handName: (code, r) => code.length === 2 ? `Pocket ${r(code[0])}s` : `${r(code[0])}${r(code[1])} ${code[2] === "s" ? "suited" : "offsuit"}`,
+    errSame: "That's the same card twice.",
+    errPair: "A pair can't be suited.",
+    errRead: raw => `Couldn't read "${raw}". Try AKs, QJo, 77 or Ah Kd.`,
+    handHint: "Type a hand like AKs, T9s, 77 or Ah Kd, or tap a square in the chart.",
+    describe: {
+      lead: (t, h) => `${t} · you're ${h} · `,
+      rfi: () => "folded to you",
+      limp: v => `${v} limps`,
+      raise: v => `${v} opens to 2.5bb`,
+      "3bet": v => `you open, ${v} 3-bets`,
+      "4bet": v => `${v} opens, you 3-bet, ${v} 4-bets`,
+    },
+    ok: "Correct.",
+    no: "Not quite.",
+    okLine: (code, a) => `${code}: ${a}.`,
+    noLine: (code, a, p) => `${code} is a <b>${a}</b> here, not ${p}.`,
+    score: (ok, n, s) => `<b>${ok}/${n}</b> correct · streak ${s}`,
+    scoreEmpty: "Pick an action for each spot",
+    pct: x => x.toFixed(1) + "%",
+    helpSections: [
+      ["basics", "Poker in 30 seconds", `
+<p>In <b>Texas hold'em</b>, each player gets 2 face-down cards, their "hand". Then 5 shared cards that everyone can use come out in three steps: the <b>flop</b> (3 cards), the <b>turn</b> (1 card) and the <b>river</b> (1 card). There's a betting round before the flop and after each of these steps.</p>
+<p>You win the pot in one of two ways: hold the best 5-card hand at the end, or get everyone else to fold before that.</p>
+<p><b>Preflop</b> is the first betting round, when you only have your 2 cards. You make this decision every single hand, and it's the one this site helps with. Playing preflop well is mostly about knowing which hands to throw away.</p>
+<p>In a <b>cash game</b> the chips are real money, the blinds never go up, and you can leave whenever you want. That's different from a tournament.</p>`],
+      ["usage", "Using the site in 4 steps", `
+<ol>
+<li><b>Players at the table</b>: how many players are dealt in. "HU" means heads-up, 2 players.</li>
+<li><b>Your seat</b>: tap a button or tap the table. Your seat shows in black on the table.</li>
+<li><b>Action before you</b>: what happened before it was your turn. If someone bet, also pick which player (they show in red on the table).</li>
+<li><b>Your hand</b>: type it (for example <code>AKs</code> or <code>Ah Kd</code>) or tap a square in the chart. The big colored label tells you what to do, and the line under it how much to bet.</li>
+</ol>
+<p>The <b>drill</b> at the bottom of the page quizzes you on random spots.</p>`],
+      ["actions", "The actions", `
+<dl>
+<dt>Fold</dt><dd>Give up your hand. You only lose what you already put in the pot.</dd>
+<dt>Check</dt><dd>Pass without betting. Only possible when nobody bet more than you, for example in the big blind when everyone else just called.</dd>
+<dt>Call</dt><dd>Put in the same amount as the last bet to stay in the hand.</dd>
+<dt>Raise</dt><dd>Bet more than the current bet. The others must call, raise again or fold.</dd>
+<dt>Open</dt><dd>The first raise of the hand.</dd>
+<dt>Limp</dt><dd>Enter the pot by just calling the big blind instead of raising. Usually a sign of a weak player.</dd>
+<dt>Complete</dt><dd>In the small blind, add 0.5bb to match the big blind.</dd>
+<dt>Iso-raise</dt><dd>Raise after a limper to "isolate" them and play against them alone.</dd>
+<dt>Over-limp</dt><dd>Limp as well after someone else limped.</dd>
+<dt>3-bet</dt><dd>Re-raise a raise. The big blind counts as bet 1, the open as bet 2, so the re-raise is bet 3.</dd>
+<dt>4-bet</dt><dd>Re-raise a 3-bet.</dd>
+<dt>All-in</dt><dd>Bet all your chips.</dd>
+<dt>Squeeze</dt><dd>A 3-bet when there was an open and at least one caller already.</dd>
+</dl>`],
+      ["positions", "Seats (positions)", `
+<p>The <b>button</b> (the "D" chip on the table) moves one seat each hand. The two players to its left post the <b>blinds</b>, forced bets that start the pot. Preflop, the first player to act is the one to the left of the big blind.</p>
+<p>After the flop, the button always acts last. Acting last is a big edge: you see what the others do before you decide. That's why the charts play far more hands from the button than from UTG.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Short</th><th>Name</th><th>Remember</th></tr></thead>
+<tbody>
+<tr><td>UTG</td><td>Under the gun</td><td>First to act preflop with everyone behind. Play tight.</td></tr>
+<tr><td>UTG+1, UTG+2</td><td>Under the gun +1 / +2</td><td>Right after UTG at 8 or 9 players. Still early position.</td></tr>
+<tr><td>LJ</td><td>Lojack</td><td>Three seats before the button. Middle position.</td></tr>
+<tr><td>HJ</td><td>Hijack</td><td>Two seats before the button.</td></tr>
+<tr><td>CO</td><td>Cutoff</td><td>Right before the button. A good seat to open wide.</td></tr>
+<tr><td>BTN</td><td>Button (dealer)</td><td>Acts last after the flop. Best seat at the table.</td></tr>
+<tr><td>SB</td><td>Small blind</td><td>Posts 0.5bb. Acts first after the flop, a tough seat.</td></tr>
+<tr><td>BB</td><td>Big blind</td><td>Posts 1bb. Acts last preflop, so it defends many hands.</td></tr>
+</tbody></table></div>
+<p>Seat groups: <b>EP</b> (early position: UTG to UTG+2), <b>MP</b> (middle position: LJ, HJ), <b>LP</b> (late position: CO, BTN).</p>
+<p><b>IP</b> (in position): you act after your opponent after the flop. <b>OOP</b> (out of position): you act before them.</p>
+<p>With fewer players, seats are removed from the front: 6-handed leaves UTG, HJ, CO, BTN, SB, BB. Heads-up, the button is also the small blind.</p>`],
+      ["hands", "Writing a hand", `
+<ul>
+<li>Ranks from highest to lowest: <b>A</b> (ace), <b>K</b> (king), <b>Q</b> (queen), <b>J</b> (jack), <b>T</b> (ten), then 9 down to 2.</li>
+<li><code>s</code> after two ranks = <b>suited</b>: same suit. A♠ K♠ is written <code>AKs</code>.</li>
+<li><code>o</code> = <b>offsuit</b>: different suits. A♠ K♦ is written <code>AKo</code>.</li>
+<li>Two cards of the same rank = a <b>pair</b> (pocket pair): <code>77</code>, <code>QQ</code>.</li>
+<li>For an exact hand, write rank then suit: <code>s</code> ♠ spades, <code>h</code> ♥ hearts, <code>d</code> ♦ diamonds, <code>c</code> ♣ clubs. Example: <code>Ah Kd</code> = A♥ K♦.</li>
+<li>Without s or o (<code>AK</code>), the site shows both versions.</li>
+</ul>
+<p>Why does suited matter? Two cards of the same suit can make a <b>flush</b> (5 cards of one suit). That makes the hand a bit stronger, so suited hands get played more often.</p>`],
+      ["chart", "Reading the chart", `
+<p>The chart shows all 169 different starting hands.</p>
+<ul>
+<li><b>The diagonal</b> holds the pairs, from AA top left to 22 bottom right.</li>
+<li><b>Above</b> the diagonal (top right): suited hands (s).</li>
+<li><b>Below</b> it (bottom left): offsuit hands (o).</li>
+<li>The closer a square is to the top-left corner, the stronger the hand.</li>
+</ul>
+<p>Colors: <span class="chip act-raise">red</span> raise, 3-bet or 4-bet · <span class="chip act-call">green</span> call · <span class="chip act-limp">yellow</span> limp, check or complete · <span class="chip act-allin">purple</span> all-in · <span class="chip act-fold">grey</span> fold.</p>
+<p>The percentages under the chart count <b>combos</b>. There are 1,326 ways to be dealt 2 cards: a pair comes in 6 combos, a suited hand in 4, an offsuit hand in 12. So AKo shows up 3 times more often than AKs.</p>`],
+      ["glossary", "Glossary", `
+<dl>
+<dt>bb</dt><dd>Big blind, used as a unit. "Open to 2.5bb" means bet 2.5 times the big blind. At a $1/$2 table, 2.5bb = $5.</dd>
+<dt>Effective stack</dt><dd>The smaller stack between you and your opponent, since you can't win more than that. The charts assume 100bb, the cash game standard.</dd>
+<dt>Pot</dt><dd>The chips in the middle that the winner of the hand takes.</dd>
+<dt>Range</dt><dd>All the hands you play a certain way in a situation. "My CO opening range" = every hand I open from the cutoff.</dd>
+<dt>Spot</dt><dd>A specific situation: your seat, the number of players and what happened before you.</dd>
+<dt>Heads-up (HU)</dt><dd>Playing with 2 players.</dd>
+<dt>Value</dt><dd>Betting a strong hand to get called by a worse one.</dd>
+<dt>Bluff</dt><dd>Betting a weak hand to make a better hand fold. Low suited aces (A5s, A4s) are common 3-bet bluffs.</dd>
+<dt>Tight / loose</dt><dd>Tight = playing few hands. Loose = playing many hands.</dd>
+<dt>Passive / aggressive</dt><dd>A passive player calls a lot and rarely raises. An aggressive player bets and raises a lot.</dd>
+<dt>Rake</dt><dd>The fee the casino or site takes from each pot.</dd>
+<dt>Solver / GTO</dt><dd>Software that computes a strategy that can't be exploited (GTO = game theory optimal). The charts here are simplified versions of that output.</dd>
+</dl>`],
+      ["tips", "Tips for beginners", `
+<ul>
+<li>Follow the charts exactly for several sessions, even when a hand "looks pretty" (like K7o or J5s from early position).</li>
+<li>Play more hands from late position (CO, BTN) and fewer from early position (UTG).</li>
+<li>Don't limp: when you're first into the pot, raise or fold.</li>
+<li>In the big blind you've already paid 1bb, so you can defend more hands, but not all of them.</li>
+<li>Learn the two most common spots first: "Folded to you" and "Someone raised". That's what the drill is for.</li>
+</ul>`],
+    ],
+  },
+};
+
+/* ---------- langue ---------- */
+let lang = "fr";
+try {
+  const saved = localStorage.getItem("preflop-lang");
+  lang = saved === "en" || saved === "fr" ? saved : (navigator.language || "fr").toLowerCase().startsWith("fr") ? "fr" : "en";
+} catch (e) {}
+const T = () => STR[lang];
+
 /* ---------- spots ---------- */
-const SITS = [
-  { id: "rfi",  name: "Tout le monde s'est couché", hint: "premier à parler" },
-  { id: "limp", name: "Quelqu'un a limpé",          hint: "a payé 1bb" },
-  { id: "raise",name: "Quelqu'un a relancé",        hint: "open" },
-  { id: "3bet", name: "Tu as relancé, on te 3-bet", hint: "sur-relance" },
-  { id: "4bet", name: "Tu as 3-bet, on te 4-bet",   hint: "re-sur-relance" },
-];
-const VIL_LABEL = { limp: "Premier à limper", raise: "Qui a relancé", "3bet": "Qui t'a 3-bet", "4bet": "Qui a ouvert puis 4-bet" };
+const SIT_IDS = ["rfi", "limp", "raise", "3bet", "4bet"];
 function sitValid(id, hi, n) { return (id === "rfi" || id === "3bet") ? hi < n - 1 : hi > 0; }
 function vilOptions(id, hi, n) {
   if (id === "rfi") return [];
@@ -345,7 +849,7 @@ function normalize(st) {
     else hi = 0;
   }
   st.hero = P[hi][0];
-  if (!sitValid(st.sit, hi, st.n)) st.sit = SITS.find(s => sitValid(s.id, hi, st.n)).id;
+  if (!sitValid(st.sit, hi, st.n)) st.sit = SIT_IDS.find(s => sitValid(s, hi, st.n));
   const opts = vilOptions(st.sit, hi, st.n);
   if (!opts.length) st.vil = null;
   else if (!opts.some(i => P[i][0] === st.vil)) st.vil = P[opts[0]][0];
@@ -355,78 +859,72 @@ function normalize(st) {
 
 const A = (cls, label, range, size) => ({ cls, label, range, size });
 function getChart(st) {
+  const L = T();
   const n = st.n, P = LAYOUT[n];
   const hi = P.findIndex(p => p[0] === st.hero);
   const key = P[hi][1];
   const vil = st.vil ? P.find(p => p[0] === st.vil) : null;
   const vkey = vil ? vil[1] : null;
-  const table = n === 2 ? "Heads-up" : `${n} joueurs`;
-  const FOLD = A("fold", "Se coucher", "", "Jette ta main.");
-  let c = { acts: [], rest: FOLD, title: "", sub: "", tip: "" };
+  const tbl = L.table(n);
+  const c = { acts: [], rest: A("fold", L.a.fold, "", L.s.fold), title: "", sub: "", tip: "" };
 
   if (st.sit === "rfi") {
-    c.sub = `${table} · tout le monde s'est couché`;
+    c.sub = L.sub.rfi(tbl);
     if (key === "HU") {
-      c.title = "Open au bouton (heads-up)";
-      c.acts = [A("raise", "Relancer", HU_RFI, "Relance à <b>2–2,5bb</b>.")];
-      c.tip = "En heads-up, le bouton a la position pendant tout le coup : ouvre très large. Couche seulement les pires mains dépareillées.";
+      c.title = L.ti.hu;
+      c.acts = [A("raise", L.a.raise, HU_RFI, L.s.huRaise)];
+      c.tip = L.tip.hu;
     } else if (key === "SB") {
-      c.title = st.sbPlan === "mix" ? "Small blind : relance ou limp" : "Small blind : relance ou couche";
-      c.acts = st.sbPlan === "mix"
-        ? [A("raise", "Relancer", SB_MIX_RAISE, "Relance à <b>3bb</b>."), A("limp", "Limper", SB_MIX_LIMP, "Complète pour <b>0,5bb</b> de plus.")]
-        : [A("raise", "Relancer", SB_RAISE_ONLY, "Relance à <b>3bb</b>.")];
-      c.tip = st.sbPlan === "mix"
-        ? "Tout le monde s'est couché jusqu'à toi en small blind. Relance tes mains fortes ; limpe les mains jouables qui ne veulent pas un gros pot hors de position."
-        : "Plan simple en small blind : jamais de limp. Relance à 3bb ou couche-toi, c'est plus facile à jouer et efficace contre des big blinds agressives.";
+      const mix = st.sbPlan === "mix";
+      c.title = mix ? L.ti.sbMix : L.ti.sbRaise;
+      c.acts = mix
+        ? [A("raise", L.a.raise, SB_MIX_RAISE, L.s.sbRaise), A("limp", L.a.limp, SB_MIX_LIMP, L.s.sbLimp)]
+        : [A("raise", L.a.raise, SB_RAISE_ONLY, L.s.sbRaise)];
+      c.tip = mix ? L.tip.sbMix : L.tip.sbRaise;
     } else {
-      c.title = `Open depuis ${st.hero}`;
-      c.acts = [A("raise", "Relancer", RFI[key], "Ouvre à <b>2,5bb</b> (3bb en live). Ajoute 1bb par limper.")];
-      c.tip = "Premier à entrer dans le coup : relance ou couche-toi. Ne limpe jamais depuis ces places. Moins il reste de joueurs derrière toi, plus tu ouvres large.";
+      c.title = L.ti.open(st.hero);
+      c.acts = [A("raise", L.a.raise, RFI[key], L.s.open)];
+      c.tip = L.tip.open;
     }
   } else if (st.sit === "limp") {
-    c.sub = `${table} · ${st.vil} a limpé`;
+    c.sub = L.sub.limp(tbl, st.vil);
     if (key === "BB") {
       const vsSB = vkey === "SB" || vkey === "HU";
-      c.title = vsSB ? "Big blind contre limp de la small blind" : "Big blind contre limpers";
-      c.acts = [A("raise", "Relancer", vsSB ? VS_LIMP.BBvsSB[0] : VS_LIMP.BBmulti[0], vsSB ? "Relance à <b>3,5–4bb</b>." : "Relance à <b>4bb + 1bb par limper</b>.")];
-      c.rest = A("limp", "Checker", "", "Checke et vois le flop gratuitement.");
-      c.tip = vsSB ? "Tu as la position contre la small blind. Relance tes mains fortes pour la value et checke le reste : tu ne te couches jamais ici." : "Tu as déjà 1bb dans le pot et le flop est gratuit. Relance seulement les mains fortes, car tu seras hors de position contre plusieurs joueurs.";
+      c.title = vsSB ? L.ti.bbVsSb : L.ti.bbVsLimp;
+      c.acts = [A("raise", L.a.raise, vsSB ? VS_LIMP.BBvsSB[0] : VS_LIMP.BBmulti[0], vsSB ? L.s.bbVsSb : L.s.isoRaise)];
+      c.rest = A("limp", L.a.check, "", L.s.check);
+      c.tip = vsSB ? L.tip.bbVsSb : L.tip.bbMulti;
     } else if (key === "SB") {
-      c.title = "Small blind contre limpers";
-      c.acts = [A("raise", "Relancer", VS_LIMP.SB[0], "Relance à <b>5bb + 1bb par limper en plus</b>."), A("limp", "Compléter", VS_LIMP.SB[1], "Complète pour <b>0,5bb</b>.")];
-      c.tip = "Compléter coûte peu avec un pot qui grossit déjà. Relance seulement les mains qui jouent bien en tête-à-tête hors de position.";
+      c.title = L.ti.sbVsLimp;
+      c.acts = [A("raise", L.a.raise, VS_LIMP.SB[0], L.s.sbIso), A("limp", L.a.complete, VS_LIMP.SB[1], L.s.complete)];
+      c.tip = L.tip.sbLimp;
     } else {
-      const late = key === "R2" || key === "R3";
-      c.title = `${st.hero} contre limpers`;
-      c.acts = [A("raise", "Iso-relancer", late ? VS_LIMP.late[0] : VS_LIMP.early[0], "Relance à <b>4bb + 1bb par limper</b>."), A("limp", "Sur-limper", late ? VS_LIMP.late[1] : VS_LIMP.early[1], "Paye <b>1bb</b> derrière.")];
-      c.tip = "Les limpers ont souvent des mains faibles. Iso-relance pour les jouer en tête-à-tête ; sur-limpe les petites paires et les mains assorties qui gagnent de gros pots à plusieurs.";
+      const r = VS_LIMP[key === "R2" || key === "R3" ? "late" : "early"];
+      c.title = L.ti.vsLimp(st.hero);
+      c.acts = [A("raise", L.a.iso, r[0], L.s.isoRaise), A("limp", L.a.overlimp, r[1], L.s.overlimp)];
+      c.tip = L.tip.vsLimp;
     }
   } else if (st.sit === "raise") {
-    const g = GROUP[vkey];
-    c.sub = `${table} · ${st.vil} a ouvert à 2,5bb`;
-    const book = key === "BB" ? VS_RAISE.BB : key === "SB" ? VS_RAISE.SB : VS_RAISE.IP;
-    const r = book[g];
-    const threeSize = (key === "BB" || key === "SB") ? "3-bet à <b>environ 4x</b> l'open (10–12bb) hors de position." : "3-bet à <b>3x</b> l'open (environ 7,5bb) en position.";
-    c.title = `${st.hero} contre open ${st.vil}`;
-    c.acts = [A("raise", "3-bet", r[0], threeSize), A("call", "Suivre", r[1], key === "BB" ? "Paye. Tu fermes l'action à prix réduit." : "Paye l'open.")];
-    c.tip = key === "BB" ? "En big blind tu as déjà 1bb dans le pot et tu fermes l'action, donc tu défends large. Contre des opens de début de parole, défends plus serré."
-      : key === "SB" ? "Depuis la small blind, privilégie 3-bet ou couche. Payer invite la big blind à squeezer et te laisse hors de position."
-      : "En position tu peux payer plus de mains. 3-bet le haut de ta range plus quelques As assortis en bluff.";
+    const blind = key === "BB" || key === "SB";
+    const r = (key === "BB" ? VS_RAISE.BB : key === "SB" ? VS_RAISE.SB : VS_RAISE.IP)[GROUP[vkey]];
+    c.sub = L.sub.raise(tbl, st.vil);
+    c.title = L.ti.vsOpen(st.hero, st.vil);
+    c.acts = [A("raise", L.a.threebet, r[0], blind ? L.s.threeOop : L.s.threeIp), A("call", L.a.call, r[1], key === "BB" ? L.s.callBB : L.s.call)];
+    c.tip = key === "BB" ? L.tip.bbDef : key === "SB" ? L.tip.sbDef : L.tip.ipDef;
   } else if (st.sit === "3bet") {
-    const g = GROUP[key];
-    const vilIsBlind = vkey === "SB" || vkey === "BB";
-    const inPos = key === "HU" || (key !== "SB" && vilIsBlind);
-    c.title = `Open ${st.hero} contre 3-bet ${st.vil}`;
-    c.sub = `${table} · tu as ouvert, ${st.vil} a 3-bet · tu es ${inPos ? "en position" : "hors de position"}`;
-    c.acts = [A("raise", "4-bet", VS_3BET[g][0], "4-bet à <b>environ 2,3x</b> le 3-bet (22–25bb)."), A("call", "Suivre", VS_3BET[g][1], "Paye le 3-bet.")];
-    c.tip = "Contre un 3-bet, continue avec environ 40 à 50 % de ta range d'open. " + (inPos ? "En position, tu peux payer un peu plus large que cette grille." : "Hors de position, retire d'abord les calls les plus faibles.");
+    const r = VS_3BET[GROUP[key]];
+    const inPos = key === "HU" || (key !== "SB" && (vkey === "SB" || vkey === "BB"));
+    c.title = L.ti.vs3bet(st.hero, st.vil);
+    c.sub = L.sub.threebet(tbl, st.vil, inPos);
+    c.acts = [A("raise", L.a.fourbet, r[0], L.s.fourbet), A("call", L.a.call, r[1], L.s.call3)];
+    c.tip = L.tip.vs3bet(inPos);
   } else if (st.sit === "4bet") {
     const early = GROUP[vkey] === "EP" || GROUP[vkey] === "MP";
-    c.title = `3-bet ${st.hero} contre 4-bet ${st.vil}`;
-    c.sub = `${table} · ${st.vil} a ouvert, tu as 3-bet, ${st.vil} a 4-bet`;
     const r = VS_4BET[early ? "early" : "late"];
-    c.acts = [A("allin", "Tapis", r[0], "Envoie <b>100bb</b>."), A("call", "Suivre", r[1], "Paye et joue le flop avec environ 50bb derrière.")];
-    c.tip = early ? "Un 4-bet depuis une place de début de parole est très fort. Seules les meilleures mains continuent." : "Les joueurs en fin de parole 4-bet plus léger, tu peux donc continuer avec plus de mains.";
+    c.title = L.ti.vs4bet(st.hero, st.vil);
+    c.sub = L.sub.fourbet(tbl, st.vil);
+    c.acts = [A("allin", L.a.allin, r[0], L.s.allin), A("call", L.a.call, r[1], L.s.call4)];
+    c.tip = early ? L.tip.vs4early : L.tip.vs4late;
   }
   return c;
 }
@@ -439,17 +937,19 @@ function chartMap(c) {
   mapCache.set(k, m);
   return m;
 }
-function actionOf(code, c) { const i = chartMap(c)[code]; return i === undefined ? c.rest : c.acts[i]; }
+const actionIndex = (code, c) => { const i = chartMap(c)[code]; return i === undefined ? c.acts.length : i; };
+const actionOf = (code, c) => [...c.acts, c.rest][actionIndex(code, c)];
 
 /* ---------- mains ---------- */
 function esc(s) { return s.replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch])); }
 function parseHand(raw) {
+  const L = T();
   const s = (raw || "").trim().toLowerCase().replace(/10/g, "t").replace(/♠/g, "s").replace(/♥/g, "h").replace(/♦/g, "d").replace(/♣/g, "c").replace(/[\s,\/-]/g, "");
   if (!s) return { codes: [] };
   let m = s.match(/^([akqjt2-9])([shdc])([akqjt2-9])([shdc])$/);
   if (m) {
     let a = [m[1].toUpperCase(), m[2]], b = [m[3].toUpperCase(), m[4]];
-    if (a[0] === b[0] && a[1] === b[1]) return { codes: [], err: "C'est deux fois la même carte." };
+    if (a[0] === b[0] && a[1] === b[1]) return { codes: [], err: L.errSame };
     if (ri(b[0]) < ri(a[0])) [a, b] = [b, a];
     const code = a[0] === b[0] ? a[0] + b[0] : a[0] + b[0] + (a[1] === b[1] ? "s" : "o");
     return { codes: [code], cards: [a, b] };
@@ -458,18 +958,18 @@ function parseHand(raw) {
   if (m) {
     let r1 = m[1].toUpperCase(), r2 = m[2].toUpperCase();
     if (ri(r2) < ri(r1)) [r1, r2] = [r2, r1];
-    if (r1 === r2) return m[3] === "s" ? { codes: [], err: "Une paire ne peut pas être assortie." } : { codes: [r1 + r2] };
+    if (r1 === r2) return m[3] === "s" ? { codes: [], err: L.errPair } : { codes: [r1 + r2] };
     return { codes: m[3] ? [r1 + r2 + m[3]] : [r1 + r2 + "s", r1 + r2 + "o"] };
   }
-  return { codes: [], err: `Impossible de lire « ${esc(raw.trim())} ». Essaie AKs, QJo, 77 ou Ah Kd.` };
+  return { codes: [], err: L.errRead(esc(raw.trim())) };
 }
 function cardsFor(code, exact) {
   if (exact) return exact;
   if (code.length === 2) return [[code[0], "s"], [code[1], "h"]];
   return code[2] === "s" ? [[code[0], "s"], [code[1], "s"]] : [[code[0], "s"], [code[1], "d"]];
 }
-function cardsHTML(cards) {
-  return `<div class="cards">${cards.map(([r, s]) => `<span class="pcard${s === "h" || s === "d" ? " red" : ""}" aria-label="${r}${s}">${r === "T" ? "10" : r}<i>${SUIT[s]}</i></span>`).join("")}</div>`;
+function cardsHTML(cards, id) {
+  return `<div class="cards"${id ? ` id="${id}"` : ""}>${cards.map(([r, s]) => `<span class="pcard${s === "h" || s === "d" ? " red" : ""}" aria-label="${r}${s}">${r === "T" ? "10" : r}<i>${SUIT[s]}</i></span>`).join("")}</div>`;
 }
 function randomCards() {
   const deck = [];
@@ -489,10 +989,7 @@ function codeOfCards([a, b]) {
   if (ri(b[0]) < ri(a[0])) [a, b] = [b, a];
   return a[0] === b[0] ? a[0] + b[0] : a[0] + b[0] + (a[1] === b[1] ? "s" : "o");
 }
-function handName(code) {
-  const r = c => c === "T" ? "10" : c;
-  return code.length === 2 ? `Paire de ${r(code[0])}` : `${r(code[0])}${r(code[1])} ${code[2] === "s" ? "assortis" : "dépareillés"}`;
-}
+const rankName = c => c === "T" ? "10" : c;
 
 /* ---------- état ---------- */
 let state = { n: 6, hero: "BTN", sit: "rfi", vil: null, sbPlan: "mix", hand: "AJo" };
@@ -501,34 +998,32 @@ function save() { try { localStorage.setItem("preflop-state", JSON.stringify(sta
 const $ = id => document.getElementById(id);
 
 function seg(el, items, current, onPick) {
-  el.innerHTML = items.map(it => `<button type="button" data-v="${esc(String(it.v))}" aria-pressed="${String(it.v) === String(current)}"${it.disabled ? " disabled" : ""}${it.aria ? ` aria-label="${it.aria}"` : ""}>${it.html}</button>`).join("");
+  el.innerHTML = items.map(it => `<button type="button" data-v="${esc(String(it.v))}" aria-pressed="${String(it.v) === String(current)}"${it.disabled ? " disabled" : ""}${it.aria ? ` aria-label="${esc(it.aria)}"` : ""}${it.title ? ` title="${esc(it.title)}"` : ""}>${it.html}</button>`).join("");
   el.onclick = e => { const b = e.target.closest("button"); if (b && !b.disabled) onPick(b.dataset.v); };
 }
 
 function seatStatus(i, hi, vi, sit) {
-  if (i === hi) return sit === "3bet" ? "toi · open" : sit === "4bet" ? "toi · 3-bet" : "toi";
-  if (i === vi) return { limp: "limp", raise: "relance", "3bet": "3-bet", "4bet": "4-bet" }[sit];
-  if (sit === "rfi") return i < hi ? "couché" : "à parler";
-  if (sit === "limp") return i < hi ? (i < vi ? "couché" : "?") : "à parler";
-  if (sit === "raise") return i < hi ? "couché" : "à parler";
-  if (sit === "3bet") return (i < hi || i < vi) ? "couché" : "à parler";
-  if (sit === "4bet") return "couché";
-  return "";
+  const S = T().status;
+  if (i === hi) return sit === "3bet" ? S.youOpen : sit === "4bet" ? S.you3 : S.you;
+  if (i === vi) return S[sit];
+  if (sit === "limp") return i < hi ? (i < vi ? S.folded : S.unknown) : S.toAct;
+  if (sit === "3bet") return (i < hi || i < vi) ? S.folded : S.toAct;
+  if (sit === "4bet") return S.folded;
+  return i < hi ? S.folded : S.toAct;
 }
 
 function renderTable() {
-  const n = state.n, P = LAYOUT[n];
+  const L = T(), n = state.n, P = LAYOUT[n];
   const hi = P.findIndex(p => p[0] === state.hero);
   const vi = state.vil ? P.findIndex(p => p[0] === state.vil) : -1;
   const b = n === 2 ? 0 : n - 3;
-  const potText = { rfi: "Blinds 0,5 / 1", limp: "Pot 2,5bb +", raise: "Pot 4bb", "3bet": "Pot ≈ 11bb", "4bet": "Pot ≈ 33bb" }[state.sit];
-  let html = `<div class="felt"><div class="pot">${potText}</div></div>`;
+  let html = `<div class="felt"><div class="pot">${L.pot[state.sit]}</div></div>`;
   P.forEach((p, i) => {
     const ang = Math.PI / 2 + (i - b) * 2 * Math.PI / n;
     const x = 50 + 45 * Math.cos(ang), y = 50 + 41 * Math.sin(ang);
     const st = seatStatus(i, hi, vi, state.sit);
-    const cls = i === hi ? "you" : i === vi ? "vil" : st === "couché" ? "out" : "";
-    html += `<button type="button" class="seat ${cls}" data-v="${p[0]}" style="left:${x}%;top:${y}%" aria-label="S'asseoir en ${p[0]}"><b>${p[0]}</b><small>${st}</small></button>`;
+    const cls = i === hi ? "you" : i === vi ? "vil" : st === L.status.folded ? "out" : "";
+    html += `<button type="button" class="seat ${cls}" data-v="${p[0]}" style="left:${x}%;top:${y}%" title="${esc(L.pos[p[0]])}" aria-label="${esc(L.sitAria(p[0]))}"><b>${p[0]}</b><small>${st}</small></button>`;
     if (i === b) {
       const dx = 50 + 31 * Math.cos(ang - 0.38), dy = 50 + 27 * Math.sin(ang - 0.38);
       html += `<span class="dealer" style="left:${dx}%;top:${dy}%">D</span>`;
@@ -540,42 +1035,40 @@ function renderTable() {
 }
 
 function renderControls() {
-  const n = state.n, P = LAYOUT[n];
+  const L = T(), n = state.n, P = LAYOUT[n];
   const hi = P.findIndex(p => p[0] === state.hero);
-  seg($("players"), [2, 3, 4, 5, 6, 7, 8, 9].map(v => ({ v, html: v === 2 ? "HU" : v, aria: `${v} joueurs` })), n, v => { state.n = +v; update(); });
-  seg($("seats"), P.map(p => ({ v: p[0], html: p[0] })), state.hero, v => { state.hero = v; update(); });
-  seg($("sits"), SITS.map(s => ({ v: s.id, html: `${s.name}<small>${s.hint}</small>`, disabled: !sitValid(s.id, hi, n) })), state.sit, v => { state.sit = v; update(); });
+  seg($("players"), [2, 3, 4, 5, 6, 7, 8, 9].map(v => ({ v, html: v === 2 ? "HU" : v, aria: L.playersAria(v) })), n, v => { state.n = +v; update(); });
+  seg($("seats"), P.map(p => ({ v: p[0], html: p[0], title: L.pos[p[0]] })), state.hero, v => { state.hero = v; update(); });
+  seg($("sits"), SIT_IDS.map(id => ({ v: id, html: `${L.sits[id][0]}<small>${L.sits[id][1]}</small>`, disabled: !sitValid(id, hi, n) })), state.sit, v => { state.sit = v; update(); });
   const opts = vilOptions(state.sit, hi, n);
   $("vilField").hidden = !opts.length;
   if (opts.length) {
-    $("vilLbl").textContent = VIL_LABEL[state.sit];
-    seg($("vils"), opts.map(i => ({ v: P[i][0], html: P[i][0] })), state.vil, v => { state.vil = v; update(); });
+    $("vilLbl").textContent = L.vil[state.sit];
+    seg($("vils"), opts.map(i => ({ v: P[i][0], html: P[i][0], title: L.pos[P[i][0]] })), state.vil, v => { state.vil = v; update(); });
   }
   const sbShow = state.sit === "rfi" && P[hi][1] === "SB";
   $("sbField").hidden = !sbShow;
-  if (sbShow) seg($("sbplan"), [{ v: "mix", html: "Relance ou limp" }, { v: "raise", html: "Relance ou couche" }], state.sbPlan, v => { state.sbPlan = v; update(); });
+  if (sbShow) seg($("sbplan"), [{ v: "mix", html: L.sbMix }, { v: "raise", html: L.sbRaise }], state.sbPlan, v => { state.sbPlan = v; update(); });
 }
 
 function renderChart() {
-  const c = getChart(state), m = chartMap(c);
+  const L = T(), c = getChart(state), m = chartMap(c);
   const sel = new Set(parseHand($("hand").value).codes);
   $("chartTitle").textContent = c.title;
   $("chartSub").textContent = c.sub;
+  const all = [...c.acts, c.rest];
+  const tally = new Array(all.length).fill(0);
   let html = "";
-  const tally = new Array(c.acts.length + 1).fill(0);
   for (let i = 0; i < 13; i++) for (let j = 0; j < 13; j++) {
     const code = cellCode(i, j);
-    const k = m[code];
-    const a = k === undefined ? c.rest : c.acts[k];
-    tally[k === undefined ? c.acts.length : k] += combos(code);
-    html += `<button type="button" class="cell act-${a.cls}${sel.has(code) ? " sel" : ""}" data-h="${code}" title="${code} : ${a.label}">${code}</button>`;
+    const k = m[code] === undefined ? c.acts.length : m[code];
+    tally[k] += combos(code);
+    html += `<button type="button" class="cell act-${all[k].cls}${sel.has(code) ? " sel" : ""}" data-h="${code}" title="${code} : ${esc(all[k].label)}">${code}</button>`;
   }
   const g = $("grid");
   g.innerHTML = html;
   g.onclick = e => { const b = e.target.closest(".cell"); if (b) { $("hand").value = b.dataset.h; state.hand = b.dataset.h; renderVerdict(); renderChartSel(); save(); } };
-  const all = [...c.acts, c.rest];
-  const pct = x => (x / 13.26).toFixed(1).replace(".", ",");
-  $("legend").innerHTML = all.map((a, i) => `<span><i class="act-${a.cls}"></i>${a.label} <b>${pct(tally[i])} %</b></span>`).join("");
+  $("legend").innerHTML = all.map((a, i) => `<span><i class="act-${a.cls}"></i>${a.label} <b>${L.pct(tally[i] / 13.26)}</b></span>`).join("");
   $("mixbar").innerHTML = all.map((a, i) => `<div class="act-${a.cls}" style="width:${tally[i] / 13.26}%"></div>`).join("");
   $("tip").textContent = c.tip;
 }
@@ -585,16 +1078,12 @@ function renderChartSel() {
 }
 
 function renderVerdict() {
-  const p = parseHand($("hand").value);
-  const v = $("verdict");
-  if (!p.codes.length) {
-    v.innerHTML = `<p class="hint">${p.err || "Tape une main comme AKs, T9s, 77 ou Ah Kd, ou touche une case de la grille."}</p>`;
-    return;
-  }
+  const L = T(), p = parseHand($("hand").value), v = $("verdict");
+  if (!p.codes.length) { v.innerHTML = `<p class="hint">${p.err || L.handHint}</p>`; return; }
   const c = getChart(state);
   v.innerHTML = p.codes.map(code => {
     const a = actionOf(code, c);
-    return `<div class="vrow">${cardsHTML(cardsFor(code, p.cards))}<div class="vact"><span class="vsize">${handName(code)} · ${esc(c.title)}</span><span class="pill act-${a.cls}">${a.label}</span><span class="vsize">${a.size}</span></div></div>`;
+    return `<div class="vrow">${cardsHTML(cardsFor(code, p.cards))}<div class="vact"><span class="vsize">${L.handName(code, rankName)} · ${esc(c.title)}</span><span class="pill act-${a.cls}">${a.label}</span><span class="vsize">${a.size}</span></div></div>`;
   }).join("");
 }
 
@@ -607,11 +1096,47 @@ function update() {
   save();
 }
 
+/* ---------- textes statiques et aide ---------- */
+function applyLang() {
+  const L = T();
+  document.documentElement.lang = lang;
+  document.title = L.pageTitle;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = L[el.dataset.i18n]; });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => el.setAttribute("aria-label", L[el.dataset.i18nAria]));
+  document.querySelectorAll("#lang button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === lang)));
+  $("helpNav").innerHTML = L.helpSections.map(([id, title]) => `<a href="#help-${id}">${title}</a>`).join("");
+  $("helpBody").innerHTML = L.helpSections.map(([id, title, html]) => `<section><h3 id="help-${id}">${title}</h3>${html}</section>`).join("");
+}
+$("lang").addEventListener("click", e => {
+  const b = e.target.closest("button[data-lang]");
+  if (!b || b.dataset.lang === lang) return;
+  lang = b.dataset.lang;
+  try { localStorage.setItem("preflop-lang", lang); } catch (e) {}
+  applyLang();
+  update();
+  if (drill) { drill.c = getChart(drill.st); renderDrill(); }
+  renderScore();
+});
+
+const help = $("help");
+function openHelp() { if (typeof help.showModal === "function") help.showModal(); else help.setAttribute("open", ""); $("helpBody").scrollTop = 0; }
+function closeHelp() { if (typeof help.close === "function") help.close(); else help.removeAttribute("open"); }
+$("helpOpen").addEventListener("click", openHelp);
+$("helpOpen2").addEventListener("click", openHelp);
+$("helpClose").addEventListener("click", closeHelp);
+help.addEventListener("click", e => { if (e.target === help) closeHelp(); });
+$("helpNav").addEventListener("click", e => {
+  const a = e.target.closest("a");
+  if (!a) return;
+  e.preventDefault();
+  const target = document.getElementById(a.getAttribute("href").slice(1));
+  if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
 $("hand").value = state.hand || "";
 $("hand").addEventListener("input", () => { state.hand = $("hand").value; renderVerdict(); renderChartSel(); save(); });
 $("rand").addEventListener("click", () => {
-  const cs = randomCards();
-  $("hand").value = cs.map(c => c[0] + c[1]).join(" ");
+  $("hand").value = randomCards().map(c => c[0] + c[1]).join(" ");
   state.hand = $("hand").value; renderVerdict(); renderChartSel(); save();
 });
 
@@ -619,20 +1144,13 @@ $("rand").addEventListener("click", () => {
 let drill = null;
 const score = { ok: 0, n: 0, streak: 0 };
 function describe(st) {
-  const tbl = st.n === 2 ? "Heads-up" : `${st.n} joueurs`;
-  const what = {
-    rfi: "tout le monde se couche jusqu'à toi",
-    limp: `${st.vil} limpe`,
-    raise: `${st.vil} ouvre à 2,5bb`,
-    "3bet": `tu ouvres, ${st.vil} te 3-bet`,
-    "4bet": `${st.vil} ouvre, tu 3-bet, ${st.vil} te 4-bet`,
-  }[st.sit];
-  return `${tbl} · tu es ${st.hero} · ${what}`;
+  const D = T().describe;
+  return D.lead(T().table(st.n), st.hero) + D[st.sit](st.vil);
 }
 function newDrill() {
   const n = 2 + Math.floor(Math.random() * 8), P = LAYOUT[n];
   const hi = Math.floor(Math.random() * n);
-  const sits = SITS.filter(s => sitValid(s.id, hi, n)).map(s => s.id);
+  const sits = SIT_IDS.filter(s => sitValid(s, hi, n));
   const weighted = sits.flatMap(s => s === "rfi" || s === "raise" ? [s, s, s] : [s]);
   const sit = weighted[Math.floor(Math.random() * weighted.length)];
   const opts = vilOptions(sit, hi, n);
@@ -644,30 +1162,36 @@ function newDrill() {
     const inPlay = Object.keys(chartMap(c));
     if (inPlay.length) cards = dealClass(inPlay[Math.floor(Math.random() * inPlay.length)]);
   }
-  const code = codeOfCards(cards);
-  drill = { st, c, code, cards, answered: false };
-  $("dDesc").textContent = describe(st);
-  $("dCards").outerHTML = cardsHTML(cards).replace('<div class="cards">', '<div class="cards" id="dCards">');
-  const choices = [...c.acts, c.rest];
-  $("dBtns").innerHTML = choices.map((a, i) => `<button type="button" data-i="${i}">${a.label}</button>`).join("");
-  $("dFeed").innerHTML = "";
+  drill = { st, c, code: codeOfCards(cards), cards, pick: null };
+  renderDrill();
+}
+function renderDrill() {
+  const L = T(), d = drill, choices = [...d.c.acts, d.c.rest];
+  const right = actionIndex(d.code, d.c);
+  $("dDesc").textContent = describe(d.st);
+  $("dCards").outerHTML = cardsHTML(d.cards, "dCards");
+  $("dBtns").innerHTML = choices.map((a, i) => {
+    const done = d.pick !== null;
+    return `<button type="button" data-i="${i}"${done && i === right ? ' aria-pressed="true"' : ""}${done && i !== right && i !== d.pick ? " disabled" : ""}>${a.label}</button>`;
+  }).join("");
+  if (d.pick === null) { $("dFeed").innerHTML = ""; return; }
+  const r = choices[right];
+  $("dFeed").innerHTML = d.pick === right
+    ? `<span class="ok">${L.ok}</span> ${L.okLine(d.code, r.label)} ${r.size}`
+    : `<span class="no">${L.no}</span> ${L.noLine(d.code, r.label, choices[d.pick].label)} ${r.size}`;
 }
 $("dBtns").addEventListener("click", e => {
   const b = e.target.closest("button");
-  if (!b || !drill || drill.answered) return;
-  drill.answered = true;
-  const choices = [...drill.c.acts, drill.c.rest];
-  const pick = choices[+b.dataset.i], right = actionOf(drill.code, drill.c);
-  const ok = pick === right;
+  if (!b || !drill || drill.pick !== null) return;
+  drill.pick = +b.dataset.i;
+  const ok = drill.pick === actionIndex(drill.code, drill.c);
   score.n++; if (ok) { score.ok++; score.streak++; } else score.streak = 0;
-  [...$("dBtns").children].forEach((el, i) => { if (choices[i] === right) el.setAttribute("aria-pressed", "true"); el.disabled = choices[i] !== right && el !== b; });
-  $("dFeed").innerHTML = ok
-    ? `<span class="ok">Bonne réponse.</span> ${drill.code} : ${right.label}. ${right.size}`
-    : `<span class="no">Raté.</span> Ici, ${drill.code} c'est <b>${right.label}</b>, pas ${pick.label}. ${right.size}`;
+  renderDrill();
   renderScore();
 });
 function renderScore() {
-  $("score").innerHTML = score.n ? `<b>${score.ok}/${score.n}</b> justes · série de ${score.streak}` : "Choisis une action pour chaque spot";
+  const L = T();
+  $("score").innerHTML = score.n ? L.score(score.ok, score.n, score.streak) : L.scoreEmpty;
 }
 $("dNext").addEventListener("click", newDrill);
 $("dOpen").addEventListener("click", () => {
@@ -679,6 +1203,7 @@ $("dOpen").addEventListener("click", () => {
   $("verdict").scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
+applyLang();
 update();
 renderScore();
 newDrill();

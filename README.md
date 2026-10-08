@@ -9,7 +9,7 @@ Situations couvertes :
 - Tu as relancé et on te 3-bet
 - Tu as 3-bet et on te 4-bet
 
-Inclut aussi un quiz de spots pour s'entraîner.
+Inclut aussi un quiz de spots pour s'entraîner, une aide pour débutants (positions, actions, abréviations, lecture de la grille) et un bouton FR / EN pour changer de langue.
 
 Les ranges sont des approximations simplifiées de solutions de solveur (une seule action par main), pas des sorties exactes.
 
