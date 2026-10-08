@@ -111,6 +111,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-
 .legend b{font-variant-numeric:tabular-nums;font-weight:600}
 .mixbar{display:flex;height:8px;border-radius:4px;overflow:hidden;max-width:640px;margin:0 auto}
 .tip{max-width:640px;margin:14px auto 0;color:var(--muted);font-size:14px}
+.src{max-width:640px;margin:10px auto 0;font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:baseline}
+.src::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;background:var(--call)}
+.src.approx::before{background:var(--limp)}
+.src a{color:var(--accent);font-weight:600}
 
 /* entraînement */
 .drillhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
@@ -228,6 +232,7 @@ dialog.help::backdrop{background:rgba(8,14,11,.6)}
         <div class="legend" id="legend"></div>
         <div class="mixbar" id="mixbar"></div>
         <p class="tip" id="tip"></p>
+        <p class="src" id="src"></p>
       </div>
     </section>
   </main>
@@ -295,6 +300,32 @@ const SB_MIX_LIMP = "55-22, A6s, A3s-A2s, K2s-K8s, Q2s-Q9s, J4s-J9s, T5s-T9s, 95
 const SB_RAISE_ONLY = "22+, A2s+, K2s+, Q5s+, J7s+, T7s+, 96s+, 86s+, 75s+, 64s+, 54s, A2o+, K8o+, Q9o+, J9o+, T9o";
 const HU_RFI = "22+, A2s+, K2s+, Q2s+, J2s+, T2s+, 92s+, 84s+, 73s+, 63s+, 52s+, 42s+, 32s, A2o+, K2o+, Q2o+, J5o+, T6o+, 96o+, 86o+, 75o+, 65o, 54o";
 
+// Grilles lues case par case sur les images publiées par Pokertrainer.se (ranges « PTO Cash 100bb », 6 joueurs).
+// 169 lettres, ligne par ligne comme la grille affichée : ligne 1 = AA AKs AQs … A2s, au-dessus de la diagonale = assorties.
+// R = relance (ou 3-bet), C = call, F = couche.
+const PTO = {
+  "BTN-Open": "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRFFRRRRRRRRRFFFFRRRRRRRRRFFFFRRFFFFRRRFFFFRFFFFFFRRRFFFRFFFFFFFRRFFFRFFFFFFFFRRFFRFFFFFFFFFRFFRFFFFFFFFFFRFFFFFFFFFFFFFR",
+  "CO-Open": "RRRRRRRRRRRRRRRRRRRRRRRRRFRRRRRRRRRRFFFRRRRRRRRFFFFFRRRRRRRFFFFFFRFFFFRRFFFFFFRFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "HJ-Open": "RRRRRRRRRRRRRRRRRRRRRRRFFFRRRRRRRFFFFFFRRRRRRFFFFFFFRRRFRRFFFFFFFRFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "LJ-Open": "RRRRRRRRRRRRRRRRRRRRRFFFFFRRRRRFFFFFFFFRRRRRFFFFFFFFRFFFRRFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "SB-Open": "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRFFRRRRRRRRRFFFFRRRRRRRRRFFFFRRFFFRRRRRFFFRFFFFFFRRRFFFRFFFFFFFRRRFFRFFFFFFFFRRFFRFFFFFFFFFRFFRFFFFFFFFFFRFFFFFFFFFFFFFR",
+  "IP-vs-LJ-HJ_SB-vs-CO": "RRRRRFFFFRRFFRRRRRFFFFFFFFRRRRFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFRFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "BTN-vs-LJ": "RRRRRCCFFRRFFRRRRRFFFFFFFFRRRRCFFFFFFFFFFFRCFFFFFFFFFFFFRFFFFFFFFFFFFFCFFFFFFFFFFFFFCFFFFFFFFFFFFFCFFFFFFFFFFFFFCRFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "BTN-vs-HJ": "RRRRRCCFFRRFFRRRRRFFFFFFFFRRRRCFFFFFFFFFFFRCFFFFFFFFFFFFRFFFFFFFFFFFFFCFFFFFFFFFFFFFCFFFFFFFFFFFFFCFFFFFFFFFFFFFCRFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "BTN-vs-CO": "RRRRRCCRRRRRRRRRRRRFFFFFFFRRRRCFFFFFFFFRRFRCFFFFFFFFRFFFRFFFFFFFFFFFFFCFFFFFFFFFFFFFCRFFFFFFFFFFFFCRFFFFFFFFFFFFCRFFFFFFFFFFFFFRFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "SB-vs-BTN": "RRRRRRRFFRRRRRRRRRRFFFFFFFRRRRRFFFFFFFFRRFRRFFFFFFFFRFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFRFFFFFFFFFFFFFRRFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+  "BB-vs-LJ": "RRRCCCCCCRRCCRRCCCCCCCCFFFRRRCCCFFFFFFFCFFCCCFFFFFFFFFFFCCCCFFFFFFFFFFCCCCFFFFFFFFFFCRCCFFFFFFFFFFCRCFFFFFFFFFFFCRCFFFFFFFFFFFCRCFFFFFFFFFFFCCFFFFFFFFFFFFCFFFFFFFFFFFFFC",
+  "BB-vs-HJ": "RRRCCCCCCRRCCRRCCCCCCCCCCFRRRCCCCFFFFFFCCCCCCCFFFFFFCFFFCCCCFFFFFFFFFFCCCCFFFFFFFFFFCRCCFFFFFFFFFFCRCFFFFFFFFFFFCRCFFFFFFFFFFFCRCFFFFFFFFFFFCCFFFFFFFFFFFFCFFFFFFFFFFFFFC",
+  "BB-vs-CO": "RRRCCCCCCRRRRRRCCCCCCCCCCCRRRCCCCCCCCFFRCCRCCCFFFFFFCCFCRCCCFFFFFCFFFFCCCCFFFFFFFFFFCRCCFFFFFFFFFFCRCCFFFFFFFFFFCRCCFFFFFFFFFFCRCFFFFFFFFFFFCCFFFFFFFFFFFFCFFFFFFFFFFFFFC",
+  "BB-vs-BTN": "RRRRCCCCCRRRRRRRRCCCCCCCCCRRRRCCCCCCCCCRCCRRCCCCCCFFCCCCRRCCCFFFFCCFCCRRCCFFFFCFFFFFCRCCFFFRFFFFFFCRCCFFRFFFFFFFCRCCFRFFFFFFFFCRCFFFFFFFFFFFCCFFFFFFFFFFFFCFFFFFFFFFFFFFC",
+  "BB-vs-SB": "RRRRRCCCCRRRRRRRRRCCCCCCCCRRRRRCCCCCCCCRCCRRCCCCCCCCCCCCRRCCCCCCCCCCCCRRCCCFFFCCFFCCCRCCCFFRFFFFFCCRCCFFRFFFFFFCCRCCFRFFFFFFFCCRCCRFFFFFFFFFCCCRFFFFFFFFFFCCRFFFFFFFFFFFC",
+};
+const PTO_OPEN = { R5: "LJ-Open", R4: "HJ-Open", R3: "CO-Open", R2: "BTN-Open" };
+// Pokerskill.com, opens à 9 joueurs : début de parole et milieu de parole
+const PS_EP = "77+, ATs+, A5s-A3s, KTs+, QJs, AJo+, KQo";
+const PS_MP = "55+, A9s+, A5s-A2s, KTs+, QTs+, JTs, T9s, ATo+, KJo+";
+
+// Approximations écrites à la main, utilisées seulement là où aucune source gratuite n'a été trouvée.
 // [3-bet, call]
 const VS_RAISE = {
   IP: {
@@ -399,7 +430,7 @@ const STR = {
     next: "Spot suivant",
     openSpot: "Voir ce spot dans la grille",
     notesTitle: "Hypothèses de ces ranges",
-    notes1: "Tapis effectifs de 100bb, rake standard type online, open à 2,5bb (3bb depuis la small blind). Les ranges sont simplifiées à partir de solutions de solveur, avec une seule action par main : quand un solveur mélange plusieurs actions, la main reçoit l'action la plus fréquente.",
+    notes1: "Tapis effectifs de 100bb, open à 2,5bb (3bb depuis la small blind). Les opens de 4 à 6 joueurs, l'open de la small blind et les réponses à un open viennent des ranges « PTO » de Pokertrainer.se, une version simplifiée de solutions de solveur avec une seule action par main. Les opens en début de parole de 7 à 9 joueurs viennent de Pokerskill.com. Pour les autres spots (contre un 3-bet ou un 4-bet, contre des limpers, heads-up, limp en small blind), aucune source gratuite n'a été trouvée : ce sont des approximations écrites à la main. La ligne sous chaque grille indique d'où elle vient.",
     notes2: "Adapte-toi aux joueurs : contre une table large et passive, relance plus de mains pour la value et bluffe moins ; contre des joueurs serrés et agressifs, couche davantage le bas de chaque range de call. En live, où les opens font 3bb ou plus, défends un peu plus serré. S'il y a déjà un joueur qui a payé l'open (spot de squeeze), garde seulement le haut de ta range de 3-bet et paye moins.",
     playersAria: n => `${n} joueurs`,
     sitAria: p => `S'asseoir en ${p}`,
@@ -428,6 +459,9 @@ const STR = {
     a: { raise: "Relancer", limp: "Limper", fold: "Se coucher", check: "Checker", complete: "Compléter", iso: "Iso-relancer", overlimp: "Sur-limper", threebet: "3-bet", call: "Suivre", fourbet: "4-bet", allin: "Tapis" },
     s: {
       fold: "Jette ta main.",
+      three75: "3-bet à <b>7,5bb</b> (3x l'open) en position.",
+      three125: "3-bet à <b>12,5bb</b> (5x l'open) hors de position.",
+      three9: "3-bet à <b>9bb</b> (3x l'open de 3bb).",
       huRaise: "Relance à <b>2–2,5bb</b>.",
       sbRaise: "Relance à <b>3bb</b>.",
       sbLimp: "Complète pour <b>0,5bb</b> de plus.",
@@ -446,6 +480,12 @@ const STR = {
       call3: "Paye le 3-bet.",
       allin: "Envoie <b>100bb</b>.",
       call4: "Paye et joue le flop avec environ 50bb derrière.",
+    },
+    src: {
+      pto: `Source : <a href="https://pokertrainer.se/preflop-3-betting-ranges/" target="_blank" rel="noopener">Pokertrainer.se</a>, ranges « PTO Cash 100bb » (version simplifiée de solutions GTO : 6 joueurs, open 2,5bb, rake type NL50).`,
+      pokerskill: `Source : <a href="https://www.pokerskill.com/charts/preflop/" target="_blank" rel="noopener">Pokerskill.com</a>, ranges d'open à 9 joueurs (100bb).`,
+      approx: "Approximation : aucune source gratuite trouvée pour ce spot. Range écrite à la main, à utiliser avec prudence.",
+      ljNote: " Aucune grille publiée contre une place plus tôt que LJ : c'est la grille contre LJ, un peu trop large ici.",
     },
     table: n => n === 2 ? "Heads-up" : `${n} joueurs`,
     sub: {
@@ -479,6 +519,8 @@ const STR = {
       vsLimp: "Les limpers ont souvent des mains faibles. Iso-relance pour les jouer en tête-à-tête ; sur-limpe les petites paires et les mains assorties qui gagnent de gros pots à plusieurs.",
       bbDef: "En big blind tu as déjà 1bb dans le pot et tu fermes l'action, donc tu défends large. Contre des opens de début de parole, défends plus serré.",
       sbDef: "Depuis la small blind, privilégie 3-bet ou couche. Payer invite la big blind à squeezer et te laisse hors de position.",
+      btnDef: "Au bouton, tu es sûr d'avoir la position après le flop : tu peux payer quelques mains (paires moyennes, quelques mains assorties). Le reste, c'est 3-bet ou couche.",
+      ipPto: "Dans ces ranges, on ne paye un open qu'au bouton et en big blind. Ailleurs, c'est 3-bet ou couche : payer laisse les joueurs derrière toi squeezer, et tu joues souvent hors de position.",
       ipDef: "En position tu peux payer plus de mains. 3-bet le haut de ta range plus quelques As assortis en bluff.",
       vs3bet: ip => "Contre un 3-bet, continue avec environ 40 à 50 % de ta range d'open. " + (ip ? "En position, tu peux payer un peu plus large que cette grille." : "Hors de position, retire d'abord les calls les plus faibles."),
       vs4early: "Un 4-bet depuis une place de début de parole est très fort. Seules les meilleures mains continuent.",
@@ -595,6 +637,13 @@ const STR = {
 <li>En big blind, tu as déjà payé 1bb : tu peux défendre plus de mains, mais pas toutes.</li>
 <li>Commence par apprendre les deux spots les plus fréquents : « Tout le monde s'est couché » et « Quelqu'un a relancé ». Le quiz est fait pour ça.</li>
 </ul>`],
+      ["sources", "D'où viennent les ranges", `
+<p>Sous chaque grille, une ligne indique sa source. Un point <span class="chip act-call">vert</span> veut dire que la grille vient d'une source publiée. Un point <span class="chip act-limp">jaune</span> veut dire que c'est une approximation.</p>
+<ul>
+<li><a href="https://pokertrainer.se/preflop-3-betting-ranges/" target="_blank" rel="noopener">Pokertrainer.se</a>, ranges « PTO Cash 100bb » : opens LJ, HJ, CO, BTN et SB, et toutes les réponses à un open (3-bet, call ou couche). Ce sont des versions simplifiées de solutions GTO pour 6 joueurs, open à 2,5bb, rake type NL50. Les grilles ont été lues case par case sur leurs images, et les pourcentages correspondent à leurs légendes.</li>
+<li><a href="https://www.pokerskill.com/charts/preflop/" target="_blank" rel="noopener">Pokerskill.com</a> : opens en début et milieu de parole à 9 joueurs (UTG, UTG+1, UTG+2).</li>
+<li>Approximations : réponses à un 3-bet ou un 4-bet, limps, heads-up et limp en small blind. Aucune source gratuite détaillée n'a été trouvée pour ces spots.</li>
+</ul>`],
     ],
   },
 
@@ -621,7 +670,7 @@ const STR = {
     next: "Next spot",
     openSpot: "Open this spot in the chart",
     notesTitle: "What these charts assume",
-    notes1: "100bb effective stacks, standard online-style rake, opens to 2.5bb (3bb from the small blind). Ranges are simplified from solver solutions into one action per hand: where a solver mixes, the hand gets its most common action.",
+    notes1: "100bb effective stacks, 2.5bb opens (3bb from the small blind). Opens from 4 to 6 players, the small blind open and all responses to an open come from Pokertrainer.se's \"PTO\" ranges, a simplified version of solver solutions with one action per hand. Early-position opens at 7 to 9 players come from Pokerskill.com. For the other spots (facing a 3-bet or 4-bet, facing limpers, heads-up, small blind limping) no free source was found, so they are hand-written approximations. The line under each chart says where it comes from.",
     notes2: "Adjust to the players: against loose, passive tables widen your value raises and cut bluffs; against tight, aggressive players fold more of the bottom of each calling range. In live games where opens are 3bb or bigger, defend a little tighter. With a caller already in the pot (a squeeze spot), keep only the top of the 3-bet range and call less.",
     playersAria: n => `${n} players`,
     sitAria: p => `Sit in ${p}`,
@@ -650,6 +699,9 @@ const STR = {
     a: { raise: "Raise", limp: "Limp", fold: "Fold", check: "Check", complete: "Complete", iso: "Iso-raise", overlimp: "Over-limp", threebet: "3-bet", call: "Call", fourbet: "4-bet", allin: "All-in" },
     s: {
       fold: "Throw it away.",
+      three75: "3-bet to <b>7.5bb</b> (3x the open) in position.",
+      three125: "3-bet to <b>12.5bb</b> (5x the open) out of position.",
+      three9: "3-bet to <b>9bb</b> (3x the 3bb open).",
       huRaise: "Raise to <b>2–2.5bb</b>.",
       sbRaise: "Raise to <b>3bb</b>.",
       sbLimp: "Complete for <b>0.5bb</b> more.",
@@ -668,6 +720,12 @@ const STR = {
       call3: "Call the 3-bet.",
       allin: "Shove <b>100bb</b>.",
       call4: "Call and play the flop with about 50bb behind.",
+    },
+    src: {
+      pto: `Source: <a href="https://pokertrainer.se/preflop-3-betting-ranges/" target="_blank" rel="noopener">Pokertrainer.se</a>, "PTO Cash 100bb" ranges (a simplified version of GTO solutions: 6-max, 2.5bb opens, NL50-style rake).`,
+      pokerskill: `Source: <a href="https://www.pokerskill.com/charts/preflop/" target="_blank" rel="noopener">Pokerskill.com</a>, 9-handed opening ranges (100bb).`,
+      approx: "Approximation: no free source found for this spot. Hand-written range, use with care.",
+      ljNote: " No published chart against seats earlier than LJ, so this is the chart against LJ, a bit too wide here.",
     },
     table: n => n === 2 ? "Heads-up" : `${n}-handed`,
     sub: {
@@ -701,6 +759,8 @@ const STR = {
       vsLimp: "Limpers usually hold weak hands. Iso-raise to play them heads-up; over-limp small pairs and suited hands that win big pots multiway.",
       bbDef: "In the big blind you already have 1bb in and close the action, so you defend wide. Against earlier openers, defend tighter.",
       sbDef: "From the small blind lean on 3-bet or fold. Flatting invites the big blind to squeeze and leaves you out of position.",
+      btnDef: "On the button you're sure to have position after the flop, so you can call a few hands (medium pairs, some suited hands). Everything else is 3-bet or fold.",
+      ipPto: "In these ranges, you only call an open from the button and the big blind. Everywhere else it's 3-bet or fold: calling lets players behind you squeeze, and you often end up out of position.",
       ipDef: "In position you can call more hands. 3-bet the top of your range plus a few suited aces as bluffs.",
       vs3bet: ip => "Against a 3-bet, keep roughly the top 40–50% of your opening range. " + (ip ? "In position you can call a bit wider than this chart." : "Out of position, cut the weakest calls first."),
       vs4early: "A 4-bet from an early seat is very strong. Only the best hands continue.",
@@ -817,6 +877,13 @@ const STR = {
 <li>In the big blind you've already paid 1bb, so you can defend more hands, but not all of them.</li>
 <li>Learn the two most common spots first: "Folded to you" and "Someone raised". That's what the drill is for.</li>
 </ul>`],
+      ["sources", "Where the ranges come from", `
+<p>Under each chart, a line says where it comes from. A <span class="chip act-call">green</span> dot means the chart comes from a published source. A <span class="chip act-limp">yellow</span> dot means it's an approximation.</p>
+<ul>
+<li><a href="https://pokertrainer.se/preflop-3-betting-ranges/" target="_blank" rel="noopener">Pokertrainer.se</a>, "PTO Cash 100bb" ranges: LJ, HJ, CO, BTN and SB opens, and every response to an open (3-bet, call or fold). They are simplified versions of GTO solutions for 6-max, 2.5bb opens, NL50-style rake. The charts were read square by square from their images, and the percentages match their legends.</li>
+<li><a href="https://www.pokerskill.com/charts/preflop/" target="_blank" rel="noopener">Pokerskill.com</a>: early and middle position opens at 9 players (UTG, UTG+1, UTG+2).</li>
+<li>Approximations: facing a 3-bet or 4-bet, limps, heads-up and small blind limping. No detailed free source was found for these spots.</li>
+</ul>`],
     ],
   },
 };
@@ -853,7 +920,7 @@ function normalize(st) {
   const opts = vilOptions(st.sit, hi, st.n);
   if (!opts.length) st.vil = null;
   else if (!opts.some(i => P[i][0] === st.vil)) st.vil = P[opts[0]][0];
-  if (st.sbPlan !== "raise") st.sbPlan = "mix";
+  if (st.sbPlan !== "mix") st.sbPlan = "raise";
   return st;
 }
 
@@ -866,7 +933,7 @@ function getChart(st) {
   const vil = st.vil ? P.find(p => p[0] === st.vil) : null;
   const vkey = vil ? vil[1] : null;
   const tbl = L.table(n);
-  const c = { acts: [], rest: A("fold", L.a.fold, "", L.s.fold), title: "", sub: "", tip: "" };
+  const c = { acts: [], rest: A("fold", L.a.fold, "", L.s.fold), title: "", sub: "", tip: "", grid: null, src: "approx", srcNote: "" };
 
   if (st.sit === "rfi") {
     c.sub = L.sub.rfi(tbl);
@@ -877,13 +944,13 @@ function getChart(st) {
     } else if (key === "SB") {
       const mix = st.sbPlan === "mix";
       c.title = mix ? L.ti.sbMix : L.ti.sbRaise;
-      c.acts = mix
-        ? [A("raise", L.a.raise, SB_MIX_RAISE, L.s.sbRaise), A("limp", L.a.limp, SB_MIX_LIMP, L.s.sbLimp)]
-        : [A("raise", L.a.raise, SB_RAISE_ONLY, L.s.sbRaise)];
+      if (mix) c.acts = [A("raise", L.a.raise, SB_MIX_RAISE, L.s.sbRaise), A("limp", L.a.limp, SB_MIX_LIMP, L.s.sbLimp)];
+      else { c.acts = [A("raise", L.a.raise, "", L.s.sbRaise)]; c.grid = PTO["SB-Open"]; c.src = "pto"; }
       c.tip = mix ? L.tip.sbMix : L.tip.sbRaise;
     } else {
       c.title = L.ti.open(st.hero);
-      c.acts = [A("raise", L.a.raise, RFI[key], L.s.open)];
+      if (PTO_OPEN[key]) { c.acts = [A("raise", L.a.raise, "", L.s.open)]; c.grid = PTO[PTO_OPEN[key]]; c.src = "pto"; }
+      else { c.acts = [A("raise", L.a.raise, key === "R6" ? PS_MP : PS_EP, L.s.open)]; c.src = "pokerskill"; }
       c.tip = L.tip.open;
     }
   } else if (st.sit === "limp") {
@@ -905,18 +972,36 @@ function getChart(st) {
       c.tip = L.tip.vsLimp;
     }
   } else if (st.sit === "raise") {
-    const blind = key === "BB" || key === "SB";
-    const r = (key === "BB" ? VS_RAISE.BB : key === "SB" ? VS_RAISE.SB : VS_RAISE.IP)[GROUP[vkey]];
     c.sub = L.sub.raise(tbl, st.vil);
     c.title = L.ti.vsOpen(st.hero, st.vil);
-    c.acts = [A("raise", L.a.threebet, r[0], blind ? L.s.threeOop : L.s.threeIp), A("call", L.a.call, r[1], key === "BB" ? L.s.callBB : L.s.call)];
-    c.tip = key === "BB" ? L.tip.bbDef : key === "SB" ? L.tip.sbDef : L.tip.ipDef;
+    // grille publiée correspondante ; contre une place plus tôt que LJ (7 à 9 joueurs), on reprend la grille contre LJ
+    const vSeat = { R8: "LJ", R7: "LJ", R6: "LJ", R5: "LJ", R4: "HJ", R3: "CO", R2: "BTN", SB: "SB" }[vkey];
+    let g = null;
+    if (key === "BB" && vSeat) g = "BB-vs-" + vSeat;
+    else if (key === "SB") g = vkey === "R2" ? "SB-vs-BTN" : "IP-vs-LJ-HJ_SB-vs-CO";
+    else if (key === "R2") g = "BTN-vs-" + vSeat;
+    else if (key !== "BB" && key !== "HU") g = "IP-vs-LJ-HJ_SB-vs-CO";
+    if (g && PTO[g]) {
+      const size = key === "BB" ? (vkey === "SB" ? L.s.three9 : L.s.three125) : key === "SB" ? L.s.three125 : L.s.three75;
+      c.acts = [A("raise", L.a.threebet, "", size), A("call", L.a.call, "", key === "BB" ? L.s.callBB : L.s.call)];
+      c.grid = PTO[g];
+      c.src = "pto";
+      if (vkey === "R6" || vkey === "R7" || vkey === "R8") c.srcNote = L.src.ljNote;
+      c.tip = key === "BB" ? L.tip.bbDef : key === "SB" ? L.tip.sbDef : key === "R2" ? L.tip.btnDef : L.tip.ipPto;
+    } else {
+      const blind = key === "BB" || key === "SB";
+      const r = (key === "BB" ? VS_RAISE.BB : key === "SB" ? VS_RAISE.SB : VS_RAISE.IP)[GROUP[vkey]];
+      c.acts = [A("raise", L.a.threebet, r[0], blind ? L.s.threeOop : L.s.threeIp), A("call", L.a.call, r[1], key === "BB" ? L.s.callBB : L.s.call)];
+      c.tip = key === "BB" ? L.tip.bbDef : key === "SB" ? L.tip.sbDef : L.tip.ipDef;
+    }
   } else if (st.sit === "3bet") {
     const r = VS_3BET[GROUP[key]];
     const inPos = key === "HU" || (key !== "SB" && (vkey === "SB" || vkey === "BB"));
     c.title = L.ti.vs3bet(st.hero, st.vil);
     c.sub = L.sub.threebet(tbl, st.vil, inPos);
     c.acts = [A("raise", L.a.fourbet, r[0], L.s.fourbet), A("call", L.a.call, r[1], L.s.call3)];
+    // seulement les mains que tu as pu ouvrir depuis cette place
+    c.limit = Object.keys(chartMap(getChart({ ...st, sit: "rfi", vil: null, sbPlan: "raise" })));
     c.tip = L.tip.vs3bet(inPos);
   } else if (st.sit === "4bet") {
     const early = GROUP[vkey] === "EP" || GROUP[vkey] === "MP";
@@ -924,16 +1009,23 @@ function getChart(st) {
     c.title = L.ti.vs4bet(st.hero, st.vil);
     c.sub = L.sub.fourbet(tbl, st.vil);
     c.acts = [A("allin", L.a.allin, r[0], L.s.allin), A("call", L.a.call, r[1], L.s.call4)];
+    // seulement les mains que tu as pu 3-bet contre cet open
+    const m3 = chartMap(getChart({ ...st, sit: "raise" }));
+    c.limit = Object.keys(m3).filter(h => m3[h] === 0);
     c.tip = early ? L.tip.vs4early : L.tip.vs4late;
   }
   return c;
 }
 const mapCache = new Map();
 function chartMap(c) {
-  const k = c.acts.map(a => a.range).join("|");
+  const k = (c.grid || c.acts.map(a => a.range).join("|")) + (c.limit ? "#" + c.limit.join(",") : "");
   if (mapCache.has(k)) return mapCache.get(k);
   const m = {};
-  c.acts.forEach((a, i) => a.range.split(",").forEach(t => expand(t).forEach(h => { if (!(h in m)) m[h] = i; })));
+  if (c.grid) {
+    const idx = { R: 0, C: 1 };
+    [...c.grid].forEach((ch, n) => { if (ch in idx) m[cellCode(Math.floor(n / 13), n % 13)] = idx[ch]; });
+  } else c.acts.forEach((a, i) => a.range.split(",").forEach(t => expand(t).forEach(h => { if (!(h in m)) m[h] = i; })));
+  if (c.limit) { const ok = new Set(c.limit); Object.keys(m).forEach(h => { if (!ok.has(h)) delete m[h]; }); }
   mapCache.set(k, m);
   return m;
 }
@@ -992,7 +1084,7 @@ function codeOfCards([a, b]) {
 const rankName = c => c === "T" ? "10" : c;
 
 /* ---------- état ---------- */
-let state = { n: 6, hero: "BTN", sit: "rfi", vil: null, sbPlan: "mix", hand: "AJo" };
+let state = { n: 6, hero: "BTN", sit: "rfi", vil: null, sbPlan: "raise", hand: "AJo" };
 try { Object.assign(state, JSON.parse(localStorage.getItem("preflop-state") || "{}")); } catch (e) {}
 function save() { try { localStorage.setItem("preflop-state", JSON.stringify(state)); } catch (e) {} }
 const $ = id => document.getElementById(id);
@@ -1048,7 +1140,7 @@ function renderControls() {
   }
   const sbShow = state.sit === "rfi" && P[hi][1] === "SB";
   $("sbField").hidden = !sbShow;
-  if (sbShow) seg($("sbplan"), [{ v: "mix", html: L.sbMix }, { v: "raise", html: L.sbRaise }], state.sbPlan, v => { state.sbPlan = v; update(); });
+  if (sbShow) seg($("sbplan"), [{ v: "raise", html: L.sbRaise }, { v: "mix", html: L.sbMix }], state.sbPlan, v => { state.sbPlan = v; update(); });
 }
 
 function renderChart() {
@@ -1071,6 +1163,8 @@ function renderChart() {
   $("legend").innerHTML = all.map((a, i) => `<span><i class="act-${a.cls}"></i>${a.label} <b>${L.pct(tally[i] / 13.26)}</b></span>`).join("");
   $("mixbar").innerHTML = all.map((a, i) => `<div class="act-${a.cls}" style="width:${tally[i] / 13.26}%"></div>`).join("");
   $("tip").textContent = c.tip;
+  $("src").className = "src" + (c.src === "approx" ? " approx" : "");
+  $("src").innerHTML = L.src[c.src] + c.srcNote;
 }
 function renderChartSel() {
   const sel = new Set(parseHand($("hand").value).codes);

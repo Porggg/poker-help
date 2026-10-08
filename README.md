@@ -11,6 +11,12 @@ Situations couvertes :
 
 Inclut aussi un quiz de spots pour s'entraîner, une aide pour débutants (positions, actions, abréviations, lecture de la grille) et un bouton FR / EN pour changer de langue.
 
-Les ranges sont des approximations simplifiées de solutions de solveur (une seule action par main), pas des sorties exactes.
+## Sources des ranges
+
+- **[Pokertrainer.se](https://pokertrainer.se/preflop-3-betting-ranges/)**, ranges « PTO Cash 100bb » (version simplifiée de solutions GTO, 6 joueurs, open 2,5bb, rake type NL50) : opens LJ, HJ, CO, BTN, SB et toutes les réponses à un open. Grilles lues case par case sur leurs images ; les pourcentages correspondent à leurs légendes.
+- **[Pokerskill.com](https://www.pokerskill.com/charts/preflop/)** : opens en début de parole à 9 joueurs.
+- **Approximations écrites à la main** pour les spots sans source gratuite : contre un 3-bet ou un 4-bet, contre des limpers, heads-up, limp en small blind.
+
+Sur le site, la ligne sous chaque grille indique sa source (point vert) ou signale une approximation (point jaune).
 
 Site : https://porggg.github.io/poker-help/
