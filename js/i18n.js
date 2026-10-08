@@ -165,7 +165,8 @@ const STR = {
 <li><b>Action avant toi</b> : ce qui s'est passé avant que ce soit à toi. Si quelqu'un a misé, choisis aussi quel joueur (il apparaît en rouge sur la table).</li>
 <li><b>Ta main</b> : tape-la (par exemple <code>AKs</code> ou <code>Ah Kd</code>) ou clique sur une case de la grille. Le grand bouton coloré te dit quoi faire, et la ligne en dessous combien miser.</li>
 </ol>
-<p>Le <b>quiz</b> en bas de page te pose des situations au hasard pour t'entraîner.</p>`],
+<p>Au-dessus de la grille, le bouton <b>Simple / GTO</b> change le type de ranges. Simple donne une seule action par main, c'est le mode à utiliser pour apprendre. GTO montre les fréquences exactes du solveur. Sous la grille, une ligne indique d'où vient la range.</p>
+<p>Le <b>quiz</b> en bas de page te pose des situations au hasard pour t'entraîner. Il suit le mode choisi : en GTO, une action jouée au moins 30 % du temps compte comme bonne réponse.</p>`],
       ["actions", "Les actions", `
 <dl>
 <dt>Se coucher (fold)</dt><dd>Abandonner ta main. Tu ne perds que ce que tu as déjà mis dans le pot.</dd>
@@ -236,7 +237,8 @@ const STR = {
 <dt>Serré / large</dt><dd>Jouer serré (tight) = peu de mains. Jouer large (loose) = beaucoup de mains.</dd>
 <dt>Passif / agressif</dt><dd>Un joueur passif paye souvent et relance rarement. Un joueur agressif mise et relance souvent.</dd>
 <dt>Rake</dt><dd>La commission prise par la salle ou le site sur chaque pot.</dd>
-<dt>Solveur / GTO</dt><dd>Un logiciel qui calcule une stratégie impossible à exploiter (GTO = game theory optimal). Les ranges ici sont des versions simplifiées de ces calculs.</dd>
+<dt>Solveur / GTO</dt><dd>Un logiciel qui calcule une stratégie impossible à exploiter (GTO = game theory optimal). Le mode GTO du site montre ces calculs ; le mode Simple en est une version simplifiée.</dd>
+<dt>Stratégie mixte</dt><dd>Jouer la même main de plusieurs façons selon les fois, par exemple 3-bet la moitié du temps et payer l'autre moitié. Ça rend ton jeu plus difficile à lire. En mode GTO, ces mains apparaissent en cases de plusieurs couleurs.</dd>
 </dl>`],
       ["conseils", "Conseils pour débuter", `
 <ul>
@@ -245,6 +247,7 @@ const STR = {
 <li>Ne limpe pas : quand tu es le premier à entrer dans le coup, relance ou couche-toi.</li>
 <li>En big blind, tu as déjà payé 1bb : tu peux défendre plus de mains, mais pas toutes.</li>
 <li>Commence par apprendre les deux spots les plus fréquents : « Tout le monde s'est couché » et « Quelqu'un a relancé ». Le quiz est fait pour ça.</li>
+<li>Reste en mode Simple tant que tu apprends. Passe en GTO quand tu connais les grilles et que tu veux voir les nuances.</li>
 </ul>`],
       ["sources", "D'où viennent les ranges", `
 <p>Sous chaque grille, une ligne indique sa source. Un point <span class="chip act-call">vert</span> veut dire que la grille vient de Pokertrainer. Un point <span class="chip act-limp">jaune</span> veut dire que c'est une approximation.</p>
@@ -421,7 +424,8 @@ const STR = {
 <li><b>Action before you</b>: what happened before it was your turn. If someone bet, also pick which player (they show in red on the table).</li>
 <li><b>Your hand</b>: type it (for example <code>AKs</code> or <code>Ah Kd</code>) or tap a square in the chart. The big colored label tells you what to do, and the line under it how much to bet.</li>
 </ol>
-<p>The <b>drill</b> at the bottom of the page quizzes you on random spots.</p>`],
+<p>Above the chart, the <b>Simple / GTO</b> switch changes the kind of ranges. Simple gives one action per hand and is the mode to learn with. GTO shows the solver's exact frequencies. Under the chart, a line says where the range comes from.</p>
+<p>The <b>drill</b> at the bottom of the page quizzes you on random spots. It follows the selected mode: in GTO, any action played at least 30% of the time counts as a right answer.</p>`],
       ["actions", "The actions", `
 <dl>
 <dt>Fold</dt><dd>Give up your hand. You only lose what you already put in the pot.</dd>
@@ -492,7 +496,8 @@ const STR = {
 <dt>Tight / loose</dt><dd>Tight = playing few hands. Loose = playing many hands.</dd>
 <dt>Passive / aggressive</dt><dd>A passive player calls a lot and rarely raises. An aggressive player bets and raises a lot.</dd>
 <dt>Rake</dt><dd>The fee the casino or site takes from each pot.</dd>
-<dt>Solver / GTO</dt><dd>Software that computes a strategy that can't be exploited (GTO = game theory optimal). The charts here are simplified versions of that output.</dd>
+<dt>Solver / GTO</dt><dd>Software that computes a strategy that can't be exploited (GTO = game theory optimal). The site's GTO mode shows that output; Simple mode is a simplified version of it.</dd>
+<dt>Mixed strategy</dt><dd>Playing the same hand in different ways from time to time, for example 3-betting half the time and calling the other half. It makes you harder to read. In GTO mode these hands show as multi-colored squares.</dd>
 </dl>`],
       ["tips", "Tips for beginners", `
 <ul>
@@ -501,6 +506,7 @@ const STR = {
 <li>Don't limp: when you're first into the pot, raise or fold.</li>
 <li>In the big blind you've already paid 1bb, so you can defend more hands, but not all of them.</li>
 <li>Learn the two most common spots first: "Folded to you" and "Someone raised". That's what the drill is for.</li>
+<li>Stay in Simple mode while you learn. Switch to GTO once you know the charts and want to see the finer points.</li>
 </ul>`],
       ["sources", "Where the ranges come from", `
 <p>Under each chart, a line says where it comes from. A <span class="chip act-call">green</span> dot means the chart comes from Pokertrainer. A <span class="chip act-limp">yellow</span> dot means it's an approximation.</p>
